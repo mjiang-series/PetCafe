@@ -1,0 +1,8 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#FFF8DC"/>
+  <rect x="50" y="200" width="300" height="80" rx="20" fill="#8B7355"/>
+  <circle cx="100" cy="240" r="30" fill="#FFD700"/>
+  <circle cx="200" cy="240" r="30" fill="#FF6347"/>
+  <circle cx="300" cy="240" r="30" fill="#87CEEB"/>
+  <text x="200" y="150" text-anchor="middle" font-size="24" fill="#8B4513">🐱 Cat Lounge 🐱</text>
+</svg>

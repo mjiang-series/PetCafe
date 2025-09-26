@@ -1,0 +1,254 @@
+{
+  "npcs": [
+    {
+      "npcId": "aria",
+      "name": "Aria",
+      "sectionType": "Bakery",
+      "personality": {
+        "traits": ["warm", "nurturing", "gentle", "caring"],
+        "voiceStyle": "soft and melodic"
+      },
+      "artRefs": {
+        "portrait": "art/npc/aria/aria_portrait.png",
+        "expressions": {
+          "happy": "art/npc/aria/aria_happy.webp",
+          "flustered": "art/npc/aria/aria_flustered.webp",
+          "thoughtful": "art/npc/aria/aria_thoughtful.webp",
+          "affectionate": "art/npc/aria/aria_affectionate.webp"
+        },
+        "cafeScene": "art/npc/aria/aria_cafe_scene.webp"
+      },
+      "bondLevel": 1,
+      "unlockConditions": [
+        {
+          "milestoneId": "aria_topic_01",
+          "requiredBondLevel": 2,
+          "requiredBondPoints": 50,
+          "requiredPets": 3,
+          "requiredSubscribers": 150,
+          "unlocks": {
+            "conversationTopics": ["aria_baking_memories"],
+            "scenes": ["aria_bakery_story_01"],
+            "bondBonus": 10
+          }
+        },
+        {
+          "milestoneId": "aria_topic_02",
+          "requiredBondLevel": 3,
+          "requiredBondPoints": 150,
+          "requiredPets": 5,
+          "requiredSubscribers": 400,
+          "unlocks": {
+            "conversationTopics": ["aria_family_traditions"],
+            "scenes": ["aria_rare_pet_vignette"],
+            "bondBonus": 20
+          }
+        }
+      ],
+      "unlockedScenes": [
+        {
+          "sceneId": "aria_intro",
+          "viewedAt": null,
+          "voicePlayed": false
+        }
+      ]
+    },
+    {
+      "npcId": "kai",
+      "name": "Kai",
+      "sectionType": "Playground",
+      "personality": {
+        "traits": ["energetic", "playful", "optimistic", "adventurous"],
+        "voiceStyle": "upbeat and enthusiastic"
+      },
+      "artRefs": {
+        "portrait": "art/npc/kai/kai_portrait.png",
+        "expressions": {
+          "excited": "art/npc/kai/kai_excited.webp",
+          "grinning": "art/npc/kai/kai_grinning.webp",
+          "determined": "art/npc/kai/kai_determined.webp",
+          "tender": "art/npc/kai/kai_tender.webp"
+        },
+        "cafeScene": "art/npc/kai/kai_cafe_scene.webp"
+      },
+      "bondLevel": 1,
+      "unlockConditions": [
+        {
+          "milestoneId": "kai_topic_01",
+          "requiredBondLevel": 2,
+          "requiredBondPoints": 60,
+          "requiredPets": 3,
+          "requiredSubscribers": 200,
+          "unlocks": {
+            "conversationTopics": ["kai_playground_memories"],
+            "scenes": ["kai_play_story_01"]
+          }
+        },
+        {
+          "milestoneId": "kai_topic_02",
+          "requiredBondLevel": 3,
+          "requiredBondPoints": 180,
+          "requiredPets": 6,
+          "requiredSubscribers": 450,
+          "unlocks": {
+            "conversationTopics": ["kai_childhood_race"],
+            "scenes": ["kai_ultra_pet_vignette"]
+          }
+        }
+      ],
+      "unlockedScenes": [
+        {
+          "sceneId": "kai_intro",
+          "viewedAt": null,
+          "voicePlayed": false
+        }
+      ]
+    },
+    {
+      "npcId": "elias",
+      "name": "Elias",
+      "sectionType": "Styling",
+      "personality": {
+        "traits": ["artistic", "thoughtful", "gentle", "perceptive"],
+        "voiceStyle": "calm and contemplative"
+      },
+      "artRefs": {
+        "portrait": "art/npc/elias/elias_portrait.png",
+        "expressions": {
+          "serene": "art/npc/elias/elias_serene.webp",
+          "focused": "art/npc/elias/elias_focused.webp",
+          "warm": "art/npc/elias/elias_warm.webp",
+          "inspired": "art/npc/elias/elias_inspired.webp"
+        },
+        "cafeScene": "art/npc/elias/elias_cafe_scene.webp"
+      },
+      "bondLevel": 1,
+      "unlockConditions": [
+        {
+          "milestoneId": "elias_topic_01",
+          "requiredBondLevel": 2,
+          "requiredBondPoints": 70,
+          "requiredPets": 3,
+          "requiredSubscribers": 220,
+          "unlocks": {
+            "conversationTopics": ["elias_art_studio"],
+            "scenes": ["elias_salon_story_01"]
+          }
+        },
+        {
+          "milestoneId": "elias_topic_02",
+          "requiredBondLevel": 3,
+          "requiredBondPoints": 200,
+          "requiredPets": 5,
+          "requiredSubscribers": 500,
+          "unlocks": {
+            "conversationTopics": ["elias_memory_canvas"],
+            "scenes": ["elias_ultra_pet_vignette"]
+          }
+        }
+      ],
+      "unlockedScenes": [
+        {
+          "sceneId": "elias_intro",
+          "viewedAt": null,
+          "voicePlayed": false
+        }
+      ]
+    }
+  ],
+  "bondMilestones": {
+    "level1": {
+      "requiredPoints": 0,
+      "unlocks": {
+        "features": ["basic_dm"],
+        "content": ["intro_scene"]
+      }
+    },
+    "level2": {
+      "requiredPoints": 100,
+      "unlocks": {
+        "scenes": ["first_memory"],
+        "features": ["voice_calls"],
+        "content": ["personal_story_1"]
+      }
+    },
+    "level3": {
+      "requiredPoints": 250,
+      "unlocks": {
+        "scenes": ["deeper_connection"],
+        "features": ["advanced_dm"],
+        "content": ["personal_story_2"]
+      }
+    },
+    "level4": {
+      "requiredPoints": 500,
+      "unlocks": {
+        "scenes": ["romantic_moment"],
+        "features": ["special_calls"],
+        "content": ["backstory_reveal"]
+      }
+    },
+    "level5": {
+      "requiredPoints": 1000,
+      "unlocks": {
+        "scenes": ["confession"],
+        "features": ["exclusive_content"],
+        "content": ["ending_route_unlock"]
+      }
+    }
+  },
+  "dmTemplates": {
+    "aria": {
+      "greeting": [
+        "Good morning! The café feels so much warmer with you here.",
+        "I was just thinking about you while kneading dough...",
+        "The pets have been asking about you all morning!"
+      ],
+      "memory_response": [
+        "That memory we made today... it means so much to me.",
+        "I keep thinking about that sweet moment we shared.",
+        "Thank you for helping me create such beautiful memories."
+      ],
+      "bond_increase": [
+        "I feel like we're growing closer each day.",
+        "You understand me in a way no one else does.",
+        "Every moment with you feels precious."
+      ]
+    },
+    "kai": {
+      "greeting": [
+        "Hey! Ready for another adventure today?",
+        "I've been bouncing off the walls waiting for you!",
+        "The playground isn't the same without you here!"
+      ],
+      "memory_response": [
+        "That was so much fun! We should do it again!",
+        "I can't stop smiling thinking about today.",
+        "You always know how to make everything more exciting!"
+      ],
+      "bond_increase": [
+        "You're becoming my favorite person to hang out with!",
+        "I feel like I can be myself around you.",
+        "Want to be adventure buddies forever?"
+      ]
+    },
+    "elias": {
+      "greeting": [
+        "Hello... I was hoping you'd visit today.",
+        "I've been sketching, and you kept appearing in my drawings.",
+        "Your presence brings such peace to this space."
+      ],
+      "memory_response": [
+        "That moment was like poetry in motion...",
+        "I wish I could capture how beautiful that memory was.",
+        "You help me see beauty in the simplest things."
+      ],
+      "bond_increase": [
+        "You inspire me more than you know.",
+        "I find myself looking forward to our quiet moments together.",
+        "There's something special about the way you see the world."
+      ]
+    }
+  }
+}
+

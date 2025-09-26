@@ -1,0 +1,61 @@
+{
+  "description": "Placeholder audio manifest for development",
+  "note": "Actual audio files will be added during asset integration phase",
+  "music": {
+    "cafe_hub_loop": {
+      "file": "music/cafe_hub.ogg",
+      "duration": 180,
+      "loop": true,
+      "volume": 0.5,
+      "placeholder": true
+    },
+    "romance_theme": {
+      "file": "music/romance.ogg",
+      "duration": 120,
+      "loop": true,
+      "volume": 0.4,
+      "placeholder": true
+    }
+  },
+  "sfx": {
+    "ui_click": {
+      "file": "sfx/ui_click.ogg",
+      "duration": 0.2,
+      "volume": 0.8,
+      "placeholder": true
+    },
+    "gacha_reveal": {
+      "file": "sfx/gacha_reveal.ogg",
+      "duration": 2.0,
+      "volume": 0.7,
+      "placeholder": true
+    },
+    "pet_happy": {
+      "file": "sfx/pet_happy.ogg",
+      "duration": 0.5,
+      "volume": 0.6,
+      "placeholder": true
+    },
+    "shift_complete": {
+      "file": "sfx/shift_complete.ogg",
+      "duration": 1.5,
+      "volume": 0.7,
+      "placeholder": true
+    },
+    "blog_publish": {
+      "file": "sfx/blog_publish.ogg",
+      "duration": 1.0,
+      "volume": 0.6,
+      "placeholder": true
+    }
+  },
+  "voice": {
+    "note": "Voice files will be generated via TTS during runtime",
+    "placeholder_snippets": [
+      "voice/aria_greeting.ogg",
+      "voice/kai_greeting.ogg",
+      "voice/elias_greeting.ogg"
+    ]
+  }
+}
+

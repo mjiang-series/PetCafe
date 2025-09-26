@@ -1,0 +1,215 @@
+{
+  "pets": [
+    {
+      "petId": "muffin",
+      "name": "Muffin",
+      "rarity": "5-star",
+      "sectionAffinity": "Bakery",
+      "npcAffinity": "aria",
+      "artRefs": {
+        "portrait": "art/pets/muffin_portrait.png",
+        "showcase": "art/pets/muffin_portrait.png",
+        "animations": ["muffin_idle", "muffin_interact"]
+      },
+      "description": "Muffin wandered into Aria's bakery one rainy morning and never left after tasting her signature honey buns. This cheerful Corgi now serves as the official taste-tester, wagging enthusiastically at every new recipe."
+    },
+    {
+      "petId": "buddy",
+      "name": "Buddy",
+      "rarity": "3-star",
+      "sectionAffinity": "Playground",
+      "npcAffinity": "kai",
+      "artRefs": {
+        "portrait": "art/pets/buddy_portrait.png",
+        "showcase": "art/pets/buddy_portrait.png",
+        "animations": ["buddy_idle", "buddy_interact"]
+      },
+      "description": "Buddy met Kai during a frisbee game at the park and became his most devoted playmate. This loyal Golden Retriever believes every visitor deserves a warm welcome and a game of fetch."
+    },
+    {
+      "petId": "prince",
+      "name": "Prince",
+      "rarity": "3-star",
+      "sectionAffinity": "Styling",
+      "npcAffinity": "elias",
+      "artRefs": {
+        "portrait": "art/pets/prince_portrait.png",
+        "showcase": "art/pets/prince_portrait.png",
+        "animations": ["prince_idle", "prince_interact"]
+      },
+      "description": "Prince was Elias's first client who refused to leave after experiencing his gentle grooming techniques. This dignified Persian now judges every styling session with regal approval or disdain."
+    },
+    {
+      "petId": "peanut",
+      "name": "Peanut",
+      "rarity": "3-star",
+      "sectionAffinity": "Bakery",
+      "npcAffinity": "aria",
+      "artRefs": {
+        "portrait": "art/pets/peanut_portrait.png",
+        "showcase": "art/pets/peanut_portrait.png",
+        "animations": ["peanut_idle", "peanut_interact"]
+      },
+      "description": "Peanut followed the scent of cinnamon rolls right into Aria's kitchen and charmed her with puppy eyes. Despite being tiny, this Pomeranian can detect the perfect baking temperature by smell alone."
+    },
+    {
+      "petId": "patches",
+      "name": "Patches",
+      "rarity": "3-star",
+      "sectionAffinity": "Styling",
+      "npcAffinity": "elias",
+      "artRefs": {
+        "portrait": "art/pets/patches_portrait.png",
+        "showcase": "art/pets/patches_portrait.png",
+        "animations": ["patches_idle", "patches_interact"]
+      },
+      "description": "Patches appeared at Elias's salon with fur so uniquely patterned that it inspired an entire season of designs. This playful Calico loves to 'help' by batting at ribbons and rolling in glitter."
+    },
+    {
+      "petId": "turbo",
+      "name": "Turbo",
+      "rarity": "4-star",
+      "sectionAffinity": "Playground",
+      "npcAffinity": "kai",
+      "artRefs": {
+        "portrait": "art/pets/turbo_portrait.png",
+        "showcase": "art/pets/turbo_portrait.png",
+        "animations": ["turbo_idle", "turbo_interact"]
+      },
+      "description": "Turbo challenged Kai to a race and won, teaching him that determination beats speed every time. This surprisingly quick tortoise loves obstacle courses and proving everyone's assumptions wrong."
+    },
+    {
+      "petId": "chip",
+      "name": "Chip",
+      "rarity": "4-star",
+      "sectionAffinity": "Bakery",
+      "npcAffinity": "aria",
+      "artRefs": {
+        "portrait": "art/pets/chip_portrait.png",
+        "showcase": "art/pets/chip_portrait.png",
+        "animations": ["chip_idle", "chip_interact"]
+      },
+      "description": "Chip impressed Aria by sorting sprinkles by color during a busy morning rush. This clever hamster has since become the bakery's tiny organizational expert, with a special fondness for chocolate chips."
+    },
+    {
+      "petId": "sunny",
+      "name": "Sunny",
+      "rarity": "4-star",
+      "sectionAffinity": "Playground",
+      "npcAffinity": "kai",
+      "artRefs": {
+        "portrait": "art/pets/sunny_portrait.png",
+        "showcase": "art/pets/sunny_portrait.png",
+        "animations": ["sunny_idle", "sunny_interact"]
+      },
+      "description": "Sunny flew down to join Kai's playground games, creating victory songs for every child who visited. This musical parakeet composes a unique melody for each game, turning playtime into a concert."
+    },
+    {
+      "petId": "whiskers",
+      "name": "Whiskers",
+      "rarity": "4-star",
+      "sectionAffinity": "Styling",
+      "npcAffinity": "elias",
+      "artRefs": {
+        "portrait": "art/pets/whiskers_portrait.png",
+        "showcase": "art/pets/whiskers_portrait.png",
+        "animations": ["whiskers_idle", "whiskers_interact"]
+      },
+      "description": "Whiskers became Elias's assistant after perfectly matching accessories to a client's outfit. This elegant ferret has an uncanny ability to find the one loose thread or misplaced bow tie."
+    },
+    {
+      "petId": "luna",
+      "name": "Luna",
+      "rarity": "4-star",
+      "sectionAffinity": "Bakery",
+      "npcAffinity": "aria",
+      "artRefs": {
+        "portrait": "art/pets/luna_portrait.png",
+        "showcase": "art/pets/luna_portrait.png",
+        "animations": ["luna_idle", "luna_interact"]
+      },
+      "description": "Luna hopped into Aria's life during Easter season and created the most beautiful egg designs she'd ever seen. This artistic rabbit can paint delicate flowers on cookies with just her whiskers and a steady paw."
+    },
+    {
+      "petId": "storm",
+      "name": "Storm",
+      "rarity": "4-star",
+      "sectionAffinity": "Styling",
+      "npcAffinity": "elias",
+      "artRefs": {
+        "portrait": "art/pets/storm_portrait.png",
+        "showcase": "art/pets/storm_portrait.png",
+        "animations": ["storm_idle", "storm_interact"]
+      },
+      "description": "Storm's impossibly soft fur gave Elias the idea for his signature 'cloud wash' grooming technique. This graceful chinchilla takes dust baths at precisely 3 PM and considers them performance art."
+    },
+    {
+      "petId": "rue",
+      "name": "Rue",
+      "rarity": "4-star",
+      "sectionAffinity": "Styling",
+      "npcAffinity": "elias",
+      "artRefs": {
+        "portrait": "art/pets/rue_portrait.png",
+        "showcase": "art/pets/rue_portrait.png",
+        "animations": ["rue_idle", "rue_interact"]
+      },
+      "description": "Rue's shimmering fins inspired Elias to add color-therapy to his styling services. This beautiful betta fish seems to sense each client's mood, displaying colors that bring them peace."
+    },
+    {
+      "petId": "harmony",
+      "name": "Harmony",
+      "rarity": "5-star",
+      "sectionAffinity": "Bakery",
+      "npcAffinity": "aria",
+      "artRefs": {
+        "portrait": "art/pets/harmony_portrait.png",
+        "showcase": "art/pets/harmony_portrait.png",
+        "animations": ["harmony_idle", "harmony_interact", "harmony_flourish"]
+      },
+      "description": "Harmony perched in Aria's window one morning, singing a lullaby her grandmother used to hum while baking. This wise cockatiel remembers every song ever sung in the bakery and weaves them into new melodies."
+    },
+    {
+      "petId": "blaze",
+      "name": "Blaze",
+      "rarity": "5-star",
+      "sectionAffinity": "Playground",
+      "npcAffinity": "kai",
+      "artRefs": {
+        "portrait": "art/pets/blaze_portrait.png",
+        "showcase": "art/pets/blaze_portrait.png",
+        "animations": ["blaze_idle", "blaze_interact", "blaze_flourish"]
+      },
+      "description": "Blaze appeared during Kai's loneliest day at the playground, initiating a game of tag that lasted until sunset. This spirited fox kit believes the best games are the ones you invent together on the spot."
+    },
+    {
+      "petId": "iris",
+      "name": "Iris",
+      "rarity": "5-star",
+      "sectionAffinity": "Styling",
+      "npcAffinity": "elias",
+      "artRefs": {
+        "portrait": "art/pets/iris_portrait.png",
+        "showcase": "art/pets/iris_portrait.png",
+        "animations": ["iris_idle", "iris_interact", "iris_flourish"]
+      },
+      "description": "Iris arrived at Elias's salon with damaged feathers, teaching him that true beauty comes from patient, gentle care. This magnificent peacock only displays their full plumage when they sense someone needs reminding of their own beauty."
+    }
+  ],
+  "gachaRates": {
+    "3-star": 0.70,
+    "4-star": 0.27,
+    "5-star": 0.03
+  },
+  "starterPull": {
+    "guaranteed": [
+      { "petId": "muffin", "rarity": "5-star" },
+      { "petId": "buddy", "rarity": "3-star" },
+      { "petId": "prince", "rarity": "3-star" }
+    ],
+    "remainingSlots": 7,
+    "guaranteedRare": 1,
+    "guaranteedUltraRare": 0
+  }
+}
+

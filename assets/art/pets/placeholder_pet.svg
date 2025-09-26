@@ -1,0 +1,15 @@
+<svg width="64" height="64" xmlns="http://www.w3.org/2000/svg">
+  <!-- Simple pet placeholder -->
+  <ellipse cx="32" cy="40" rx="20" ry="18" fill="#D2691E"/>
+  <circle cx="32" cy="24" r="12" fill="#D2691E"/>
+  <!-- Eyes -->
+  <circle cx="28" cy="22" r="2" fill="black"/>
+  <circle cx="36" cy="22" r="2" fill="black"/>
+  <!-- Nose -->
+  <ellipse cx="32" cy="26" rx="3" ry="2" fill="black"/>
+  <!-- Ears -->
+  <ellipse cx="24" cy="14" rx="6" ry="8" fill="#D2691E" transform="rotate(-20 24 14)"/>
+  <ellipse cx="40" cy="14" rx="6" ry="8" fill="#D2691E" transform="rotate(20 40 14)"/>
+  <text x="32" y="58" font-family="Arial, sans-serif" font-size="8" fill="#8B4513" text-anchor="middle">Pet</text>
+</svg>
+

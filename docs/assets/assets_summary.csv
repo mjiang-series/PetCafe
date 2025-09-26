@@ -1,0 +1,21 @@
+category,total_assets,high_priority,medium_priority,low_priority,completed,notes
+Pet Assets,45,6,24,6,0,"15 pets × 2 images each + 15 animation sets"
+NPC Assets,18,3,9,6,0,"3 NPCs × 5 expressions + 3 scene illustrations"
+UI Icons,13,7,6,0,2,"Navigation and game system icons"
+Scene Backgrounds,13,4,2,3,4,"Various game scenes and backgrounds"
+Audio Music,3,1,2,0,0,"Background music tracks"
+Audio SFX,24,8,10,6,0,"Sound effects for all interactions"
+Total,116,29,53,21,6,"10 weeks of asset production needed"
+
+Priority Breakdown:
+- High Priority (29): Core gameplay assets needed for vertical slice
+- Medium Priority (53): Enhanced experience and variety
+- Low Priority (21): Polish and advanced features
+- Completed (6): Already created placeholder assets
+
+Asset Production Timeline:
+Week 1-2: High priority UI icons and scene backgrounds
+Week 3-4: Starter pet portraits and showcases (9 pets)
+Week 5-6: NPC portraits and main expressions
+Week 7-8: Remaining pets and audio implementation
+Week 9-10: Polish, animations, and remaining assets

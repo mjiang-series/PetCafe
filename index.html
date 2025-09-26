@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#FDEBD0" />
+  <meta name="description" content="Pet Café - A romance dating sim and idle pet café hybrid game" />
+  
+  <!-- PWA support -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Love & Pets" />
+  
+  <!-- Preload critical resources -->
+  <!-- <link rel="preload" href="/fonts/game-font.woff2" as="font" type="font/woff2" crossorigin /> -->
+  
+  <title>Love & Pets Café</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="art/love_pets_logo_transparent.png" />
+  <link rel="apple-touch-icon" href="art/love_pets_logo_transparent.png" />
+  
+  <!-- Google Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+  <!-- Main stylesheets - Unified Responsive -->
+  <link rel="stylesheet" href="/src/styles/main.css" />
+  <link rel="stylesheet" href="/src/styles/unified-responsive.css" />
+  <link rel="stylesheet" href="/src/styles/navigation-unified.css" />
+  <link rel="stylesheet" href="/src/styles/navigation-layout.css" />
+  <link rel="stylesheet" href="/src/styles/icons.css" />
+  <link rel="stylesheet" href="/src/styles/shift-rewards-modal.css" />
+  <link rel="stylesheet" href="/src/styles/scene-player.css" />
+  <link rel="stylesheet" href="/src/styles/voice-call.css" />
+  <link rel="stylesheet" href="/src/styles/save-slots.css" />
+  <link rel="stylesheet" href="/src/styles/gacha.css" />
+  <link rel="stylesheet" href="/src/styles/pet-collection.css" />
+  <link rel="stylesheet" href="/src/styles/offline-report.css" />
+  <link rel="stylesheet" href="/src/styles/blog.css" />
+  <link rel="stylesheet" href="/src/styles/shift-progress.css" />
+  <link rel="stylesheet" href="/src/styles/memory-selection.css" />
+  <link rel="stylesheet" href="/src/styles/dm-screens.css" />
+  
+  <!-- Inline critical CSS to prevent FOUC -->
+  <style>
+    /* Critical CSS - Loading screen and basic layout */
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #FFF4E0;
+      overflow: hidden;
+      height: 100vh;
+      height: 100dvh; /* Dynamic viewport height for mobile */
+    }
+    
+    #app {
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* Loading screen */
+    .initial-loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #FFF4E0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      transition: opacity 0.5s ease;
+    }
+    
+    .initial-loading.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .loading-logo {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #8B4513;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    
+    .loading-logo-img {
+      width: 200px;
+      max-width: 80vw;
+      height: auto;
+      margin-bottom: 1.5rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .loading-subtitle {
+      font-size: 1rem;
+      color: #A0522D;
+      margin-top: 1rem;
+    }
+    
+    .pawprint-spinner {
+      width: 40px;
+      height: 40px;
+      background: #FF9E80;
+      border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      animation: pawprint-bounce 1.5s ease-in-out infinite;
+      position: relative;
+    }
+    
+    .pawprint-spinner::before,
+    .pawprint-spinner::after {
+      content: '';
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #FF9E80;
+      border-radius: 50%;
+      top: -6px;
+    }
+    
+    .pawprint-spinner::before {
+      left: 6px;
+    }
+    
+    .pawprint-spinner::after {
+      right: 6px;
+    }
+    
+    @keyframes pawprint-bounce {
+      0%, 80%, 100% {
+        transform: scale(0.8);
+        opacity: 0.7;
+      }
+      40% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+      }
+    }
+    
+    /* Screen base styles */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+    }
+    
+    .screen--visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Notification container */
+    .notification-container {
+      position: fixed;
+      top: env(safe-area-inset-top, 20px);
+      right: 20px;
+      z-index: 9000;
+      pointer-events: none;
+    }
+    
+    .notification {
+      pointer-events: all;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(30, 20, 10, 0.1);
+      margin-bottom: 10px;
+      padding: 16px;
+      max-width: 320px;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .notification--visible {
+      transform: translateX(0);
+    }
+    
+    .notification--error {
+      border-left: 4px solid #ff6b6b;
+    }
+    
+    .notification--success {
+      border-left: 4px solid #51cf66;
+    }
+    
+    /* Loading overlay */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .loading-overlay.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+    
+    .loading-spinner {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Accessibility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Initial loading screen -->
+    <div class="initial-loading" id="initial-loading">
+      <img src="art/love_pets_logo_transparent.png" alt="Love & Pets" class="loading-logo-img" />
+      <div class="loading-subtitle">Loading your cozy café...</div>
+    </div>
+  </div>
+  
+  <!-- Game entry point -->
+  <script type="module" src="/src/entry/main.ts"></script>
+  
+  <!-- Service worker registration for PWA -->
+  <script>
+    // Register service worker for offline support (to be implemented)
+    // Commented out until sw.js is created
+    /*
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('[SW] Service Worker registered successfully');
+          })
+          .catch(error => {
+            console.log('[SW] Service Worker registration failed');
+          });
+      });
+    }
+    */
+    
+    // Hide loading screen once DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        const loadingScreen = document.getElementById('initial-loading');
+        if (loadingScreen) {
+          loadingScreen.classList.add('hidden');
+          setTimeout(() => loadingScreen.remove(), 500);
+        }
+      }, 1000); // Minimum loading time for branding
+    });
+    
+    // Prevent zoom on iOS
+    document.addEventListener('gesturestart', function (e) {
+      e.preventDefault();
+    });
+    
+    // Set viewport height CSS custom property for mobile
+    function setViewportHeight() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    
+    setViewportHeight();
+    window.addEventListener('resize', setViewportHeight);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(setViewportHeight, 100);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#F0F8FF"/>
+  <rect x="50" y="200" width="300" height="80" rx="20" fill="#D3D3D3"/>
+  <circle cx="200" cy="100" r="50" fill="#FFB6C1"/>
+  <text x="200" y="110" text-anchor="middle" font-size="40">🐾</text>
+  <text x="200" y="250" text-anchor="middle" font-size="20" fill="#696969">Pet Café Memory</text>
+</svg>

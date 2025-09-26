@@ -1,0 +1,37 @@
+category,total_assets,specifications,high_priority,medium_priority,low_priority,completed,notes
+Pet Portraits,15,512x512 WebP,3,9,3,0,"Square format for UI display"
+Pet Showcases,15,1024x1024 WebP,3,9,3,0,"Full body illustrations with environment"
+Pet Animations,15,Sprite sheets,0,0,0,0,"Idle and interact animations per pet"
+NPC Portraits,3,768x1024 WebP,3,0,0,0,"Portrait orientation for dialogue"
+NPC Expressions,15,768x1024 WebP,3,9,3,0,"5 expressions per character"
+NPC Scenes,3,1920x1080 WebP,0,3,0,0,"Full scene illustrations"
+UI Icons,13,64x64 SVG,7,6,0,2,"Scalable vector graphics"
+UI Banners,1,1200x400 SVG,1,0,0,0,"Gacha banner graphic"
+Scene Backgrounds,9,1920x1080 WebP,4,2,3,0,"16:9 aspect ratio for desktop"
+Memory Scenes,5,800x600 SVG,0,0,0,5,"4:3 aspect for memory cards"
+Logo,1,512x512 PNG,0,0,0,1,"Already completed"
+Background Music,3,"2-4 minutes, looping",1,2,0,0,"Seamless loop points required"
+Sound Effects,21,"0.5-5 seconds",7,10,4,0,"WAV/MP3 format"
+Ambient Sounds,4,"2-3 minutes, looping",0,0,4,0,"Environmental atmosphere"
+Total,119,Various,32,52,20,8,"Complete asset package"
+
+Technical Specifications Summary:
+- Pet Assets: 512x512 portraits, 1024x1024 showcases (WebP format for quality/size)
+- NPC Assets: 768x1024 portrait orientation (WebP format)
+- UI Icons: 64x64 SVG for scalability
+- Backgrounds: 1920x1080 for desktop, 1080x1920 for mobile-first screens
+- Audio: MP3 format, normalized volume levels, seamless loops for BGM/ambience
+
+File Size Estimates:
+- WebP Images: ~50-200KB per image depending on complexity
+- SVG Icons: ~2-10KB per icon
+- Background Music: ~3-5MB per track (128kbps MP3)
+- Sound Effects: ~10-100KB per effect
+- Total Package: ~50-75MB for all assets
+
+Production Guidelines:
+- Consistent art style across all pet and NPC illustrations
+- Mobile-first design consideration for UI elements
+- Accessibility: High contrast for icons, clear audio cues
+- Performance: Optimize file sizes without quality loss
+- Naming convention: Follow exact filenames in CSVs

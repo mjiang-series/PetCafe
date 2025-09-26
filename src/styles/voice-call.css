@@ -1,0 +1,58 @@
+.voice-call-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 4000;
+}
+
+.voice-call-overlay.visible {
+  display: flex;
+}
+
+.voice-call-card {
+  width: 90vw;
+  max-width: 360px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.25);
+  text-align: center;
+}
+
+.voice-call-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: #ff9e80;
+}
+
+.voice-call-header .material-icons {
+  font-size: 32px;
+}
+
+.voice-call-caption {
+  margin: 0 0 16px;
+  color: #5b4632;
+  font-size: 0.95rem;
+}
+
+.voice-call-controls .btn {
+  width: 100%;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+body.voice-call-active {
+  overflow: hidden;
+}

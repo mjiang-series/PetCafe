@@ -1,0 +1,90 @@
+.scene-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4000;
+}
+
+.scene-player {
+  position: relative;
+  width: 90vw;
+  max-width: 480px;
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.scene-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  filter: blur(8px) brightness(0.6);
+  z-index: 0;
+}
+
+.scene-content {
+  position: relative;
+  z-index: 1;
+  padding: 24px;
+  color: #fff;
+}
+
+.scene-title {
+  margin: 0 0 12px;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.scene-dialogue {
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.scene-speaker {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #ffe8e0;
+}
+
+.scene-text {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.scene-controls {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.scene-controls .scene-next {
+  background: #ff9e80;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 20px;
+  color: #3d2c18;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 158, 128, 0.4);
+}
+
+.scene-controls .scene-next:hover {
+  background: #ffb199;
+}
+
+body.scene-active {
+  overflow: hidden;
+}

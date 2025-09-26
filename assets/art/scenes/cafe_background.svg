@@ -1,0 +1,31 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sky/Wall -->
+  <rect width="800" height="400" fill="#FDEBD0"/>
+  
+  <!-- Floor -->
+  <rect y="400" width="800" height="200" fill="#D2691E"/>
+  
+  <!-- Window -->
+  <rect x="50" y="50" width="200" height="150" fill="#87CEEB" stroke="#8B4513" stroke-width="4"/>
+  <line x1="150" y1="50" x2="150" y2="200" stroke="#8B4513" stroke-width="4"/>
+  <line x1="50" y1="125" x2="250" y2="125" stroke="#8B4513" stroke-width="4"/>
+  
+  <!-- Counter -->
+  <rect x="400" y="300" width="350" height="150" fill="#A0522D"/>
+  <rect x="400" y="280" width="350" height="20" fill="#8B4513"/>
+  
+  <!-- Tables -->
+  <ellipse cx="200" cy="450" rx="80" ry="40" fill="#CD853F"/>
+  <ellipse cx="600" cy="480" rx="60" ry="30" fill="#CD853F"/>
+  
+  <!-- Sign -->
+  <rect x="300" y="100" width="200" height="80" fill="#FF9E80" stroke="#8B4513" stroke-width="3"/>
+  <text x="400" y="145" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle">Pet Café</text>
+  
+  <!-- Decorative elements -->
+  <circle cx="100" cy="350" r="30" fill="#FFB6C1" opacity="0.5"/>
+  <circle cx="700" cy="350" r="25" fill="#98FB98" opacity="0.5"/>
+  
+  <text x="400" y="550" font-family="Arial, sans-serif" font-size="12" fill="#8B4513" text-anchor="middle">(Placeholder Background)</text>
+</svg>
+

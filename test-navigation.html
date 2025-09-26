@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navigation Test - PetCafe</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    .status {
+      padding: 8px 16px;
+      border-radius: 4px;
+      display: inline-block;
+      margin: 4px;
+    }
+    .pass { background: #d4edda; color: #155724; }
+    .fail { background: #f8d7da; color: #721c24; }
+    .warn { background: #fff3cd; color: #856404; }
+    .info { background: #d1ecf1; color: #0c5460; }
+    .code {
+      background: #f8f9fa;
+      padding: 4px 8px;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>PetCafe Navigation System Test</h1>
+  
+  <div class="test-section">
+    <h2>Component Loading</h2>
+    <div id="component-tests"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>CSS Loading</h2>
+    <div id="css-tests"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Navigation Elements</h2>
+    <div id="nav-tests"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Screen Tests</h2>
+    <div id="screen-tests"></div>
+  </div>
+
+  <script type="module">
+    const results = {
+      components: document.getElementById('component-tests'),
+      css: document.getElementById('css-tests'),
+      nav: document.getElementById('nav-tests'),
+      screens: document.getElementById('screen-tests')
+    };
+
+    function addResult(section, text, status = 'info') {
+      const div = document.createElement('div');
+      div.innerHTML = `<span class="status ${status}">${text}</span>`;
+      results[section].appendChild(div);
+    }
+
+    // Test 1: Check if navigation components exist
+    async function testComponents() {
+      try {
+        // Check if files exist
+        const files = [
+          '/src/ui/components/PersistentHeader.ts',
+          '/src/ui/components/BottomNavigation.ts',
+          '/src/ui/components/ScreenHeader.ts',
+          '/src/ui/UnifiedBaseScreen.ts'
+        ];
+
+        for (const file of files) {
+          try {
+            const response = await fetch(file);
+            if (response.ok) {
+              addResult('components', `✓ ${file} exists`, 'pass');
+            } else {
+              addResult('components', `✗ ${file} not found`, 'fail');
+            }
+          } catch (e) {
+            addResult('components', `✗ ${file} error: ${e.message}`, 'fail');
+          }
+        }
+      } catch (e) {
+        addResult('components', `Component test error: ${e.message}`, 'fail');
+      }
+    }
+
+    // Test 2: Check CSS loading
+    function testCSS() {
+      const stylesheets = document.styleSheets;
+      let found = false;
+      
+      for (let sheet of stylesheets) {
+        if (sheet.href && sheet.href.includes('navigation-unified.css')) {
+          found = true;
+          addResult('css', '✓ navigation-unified.css is loaded', 'pass');
+          
+          // Try to check some CSS variables
+          try {
+            const root = document.documentElement;
+            const computedStyle = getComputedStyle(root);
+            const headerHeight = computedStyle.getPropertyValue('--header-height');
+            if (headerHeight) {
+              addResult('css', `✓ CSS variables loaded (--header-height: ${headerHeight})`, 'pass');
+            }
+          } catch (e) {
+            addResult('css', 'Could not check CSS variables', 'warn');
+          }
+          break;
+        }
+      }
+      
+      if (!found) {
+        addResult('css', '✗ navigation-unified.css not loaded', 'fail');
+      }
+    }
+
+    // Test 3: Check navigation element creation
+    async function testNavigation() {
+      try {
+        // Load the main app to see if navigation renders
+        addResult('nav', 'Checking if navigation components render...', 'info');
+        
+        // Check for navigation in DOM
+        setTimeout(() => {
+          const header = document.querySelector('.persistent-header');
+          const bottomNav = document.querySelector('.bottom-navigation');
+          
+          if (header) {
+            addResult('nav', '✓ Persistent header found in DOM', 'pass');
+          } else {
+            addResult('nav', '✗ Persistent header not found', 'fail');
+          }
+          
+          if (bottomNav) {
+            addResult('nav', '✓ Bottom navigation found in DOM', 'pass');
+            
+            // Check for Messages tab
+            const messagesTab = bottomNav.querySelector('[data-nav="messages"]');
+            if (messagesTab) {
+              addResult('nav', '✓ Messages tab exists in bottom nav', 'pass');
+            } else {
+              addResult('nav', '✗ Messages tab missing', 'fail');
+            }
+          } else {
+            addResult('nav', '✗ Bottom navigation not found', 'fail');
+          }
+        }, 1000);
+      } catch (e) {
+        addResult('nav', `Navigation test error: ${e.message}`, 'fail');
+      }
+    }
+
+    // Test 4: Check screen updates
+    function testScreens() {
+      // Check if UnifiedCafeScreen was updated
+      addResult('screens', 'Checking screen updates...', 'info');
+      
+      const screenChecks = [
+        { file: 'UnifiedCafeScreen', shouldHave: ['UnifiedBaseScreen', 'createContent'], shouldNotHave: ['mobile-nav', 'desktop-actions'] },
+        { file: 'SectionType', shouldHave: ['salon'], shouldNotHave: ['styling'] }
+      ];
+      
+      screenChecks.forEach(check => {
+        addResult('screens', `Checking ${check.file}...`, 'info');
+      });
+    }
+
+    // Run tests
+    (async () => {
+      await testComponents();
+      testCSS();
+      await testNavigation();
+      testScreens();
+    })();
+  </script>
+
+  <!-- Load the actual app CSS to test -->
+  <link rel="stylesheet" href="/src/styles/main.css" />
+  <link rel="stylesheet" href="/src/styles/navigation-unified.css" />
+</body>
+</html>

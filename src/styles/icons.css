@@ -1,0 +1,143 @@
+/* Material Icons System for PetCafe */
+
+/* Base Material Icons styling */
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: inherit;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  vertical-align: middle;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga';
+}
+
+/* Icon sizes */
+.icon-xs { font-size: 16px; }
+.icon-sm { font-size: 18px; }
+.icon-md { font-size: 24px; }
+.icon-lg { font-size: 32px; }
+.icon-xl { font-size: 48px; }
+
+/* Icon spacing */
+.icon-left {
+  margin-right: 0.25em;
+}
+
+.icon-right {
+  margin-left: 0.25em;
+}
+
+/* Icon colors */
+.icon-primary { color: var(--color-coral, #FF9E80); }
+.icon-gold { color: var(--color-gold, #FFD166); }
+.icon-gem { color: #9C27B0; }
+.icon-love { color: #E91E63; }
+.icon-success { color: #4CAF50; }
+.icon-warning { color: #FF9800; }
+.icon-error { color: #F44336; }
+.icon-info { color: #2196F3; }
+
+/* Unified icon wrapper for both emoji and material icons */
+.game-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+/* Button icon adjustments */
+.btn .material-icons,
+.btn .game-icon {
+  margin-right: 0.5em;
+}
+
+.btn--icon .material-icons,
+.btn--icon .game-icon {
+  margin-right: 0;
+  font-size: 20px;
+}
+
+/* Stat and currency icon adjustments */
+.stat-item .material-icons,
+.currency-display .material-icons {
+  margin-right: 0.25em;
+  font-size: 18px;
+}
+
+/* Navigation icon adjustments */
+.nav-item .material-icons {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+/* Badge icon adjustments */
+.notification-badge + .material-icons,
+.unread-badge + .material-icons {
+  position: relative;
+}
+
+/* Animated icons */
+@keyframes icon-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes icon-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.icon-spin {
+  animation: icon-spin 2s linear infinite;
+}
+
+.icon-pulse {
+  animation: icon-pulse 1.5s ease-in-out infinite;
+}
+
+/* Touch target sizing for mobile */
+.icon-touch {
+  min-width: 48px;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Icon transitions */
+.material-icons {
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.btn:hover .material-icons,
+.icon-touch:hover .material-icons {
+  transform: scale(1.1);
+}
+
+/* Accessibility */
+.material-icons[aria-hidden="true"] {
+  speak: none;
+}
+
+/* Fallback for emoji icons during migration */
+.icon-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2em;
+  line-height: 1;
+  vertical-align: middle;
+  margin-right: 0.25em;
+}

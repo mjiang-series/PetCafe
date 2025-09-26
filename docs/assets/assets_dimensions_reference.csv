@@ -1,0 +1,24 @@
+asset_type,dimensions,aspect_ratio,format,usage,notes
+Pet Portrait,512x512,1:1,WebP,"Collection screen, UI cards","Square format for grid layouts"
+Pet Showcase,1024x1024,1:1,WebP,"Gacha reveals, detail view","High detail for special moments"
+NPC Portrait,768x1024,3:4,WebP,"Dialogue screens, DM interface","Portrait orientation, waist-up view"
+NPC Expression,768x1024,3:4,WebP,"Emotion variations","Same framing as portrait"
+NPC Scene,1920x1080,16:9,WebP,"Story scenes, backgrounds","Full environment illustrations"
+UI Icon,64x64,1:1,SVG,"Buttons, indicators","Scalable for different screen sizes"
+Scene Background,1920x1080,16:9,WebP,"Desktop game screens","Standard HD resolution"
+Mobile Background,1080x1920,9:16,WebP,"Mobile-first screens","Portrait orientation"
+Memory Scene,800x600,4:3,SVG,"Blog post images","Smaller size for quick loading"
+Game Logo,512x512,1:1,PNG,"Splash screen, app icon","Multiple sizes may be needed"
+UI Banner,1200x400,3:1,SVG,"Promotional graphics","Wide format for headers"
+
+Audio Specifications:
+Background Music,3-4 minutes,-,MP3,"Looping background tracks","128-192kbps, -14 LUFS"
+Sound Effects,0.5-5 seconds,-,MP3/WAV,"UI and gameplay feedback","44.1kHz, -12 LUFS"
+Ambient Sounds,2-3 minutes,-,MP3,"Environmental atmosphere","Seamless loops, -18 LUFS"
+
+Optimization Guidelines:
+- WebP: Quality 85-90 for best size/quality balance
+- SVG: Optimize paths, remove unnecessary metadata
+- PNG: Use PNG-8 for simple graphics, PNG-24 for complex
+- Audio: Normalize all audio to consistent loudness (LUFS)
+- Mobile: Consider 2x and 3x versions for high DPI screens

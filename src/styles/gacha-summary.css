@@ -1,0 +1,152 @@
+/* Gacha Summary Modal */
+.gacha-summary-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gacha-summary-modal .modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.gacha-summary-modal .modal__content {
+  position: relative;
+  background: white;
+  border-radius: var(--border-radius-lg);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: var(--spacing-xl);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.gacha-summary h2 {
+  text-align: center;
+  margin: 0 0 var(--spacing-xl);
+  color: var(--text-primary);
+}
+
+/* Summary Sections */
+.summary-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.summary-section:last-of-type {
+  margin-bottom: var(--spacing-lg);
+}
+
+.summary-section h3 {
+  margin: 0 0 var(--spacing-md);
+  color: var(--text-secondary);
+  font-size: var(--font-size-lg);
+}
+
+/* New Pets Grid */
+.new-pets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.new-pets-grid .pet-card {
+  background: white;
+  border: 2px solid var(--primary-color);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-sm);
+  text-align: center;
+}
+
+.new-pets-grid .pet-portrait {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--spacing-xs);
+}
+
+.new-pets-grid .pet-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.new-pets-grid .pet-name {
+  font-size: var(--font-size-sm);
+  margin: 0 0 var(--spacing-xs);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.new-pets-grid .pet-rarity {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+/* Duplicate Summary */
+.duplicate-summary {
+  background: #F3F4F6;
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  text-align: center;
+}
+
+.token-reward {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.token-reward .material-icons {
+  font-size: 32px;
+  color: #FFA000;
+}
+
+.token-amount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.token-label {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+}
+
+.duplicate-count {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-sm);
+}
+
+/* Summary Actions */
+.summary-actions {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--spacing-md);
+  border-top: 1px solid #E0E0E0;
+}
+
+.summary-actions .btn {
+  min-width: 150px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .new-pets-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+  
+  .new-pets-grid .pet-portrait {
+    width: 60px;
+    height: 60px;
+  }
+}

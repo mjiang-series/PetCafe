@@ -1,0 +1,31 @@
+{
+  "scenes": [
+    {
+      "sceneId": "aria_bakery_story_01",
+      "title": "Warm Bread Memories",
+      "background": "art/scenes/bakery_evening.jpg",
+      "npcId": "aria",
+      "dialogues": [
+        { "speaker": "Aria", "text": "The bakery feels different tonight... warmer somehow." },
+        { "speaker": "Player", "text": "Maybe it's the fresh bread—or the company." }
+      ],
+      "rewards": {
+        "bond": { "npcId": "aria", "points": 20 }
+      }
+    },
+    {
+      "sceneId": "kai_play_story_01",
+      "title": "Playground Sparks",
+      "background": "art/scenes/playground_dusk.jpg",
+      "npcId": "kai",
+      "dialogues": [
+        { "speaker": "Kai", "text": "Blaze wouldn't stop running today! You should've seen him." },
+        { "speaker": "Player", "text": "I can practically hear you laughing." }
+      ],
+      "rewards": {
+        "bond": { "npcId": "kai", "points": 20 }
+      }
+    }
+  ]
+}
+
