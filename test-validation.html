@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetCafe Validation Test</title>
+</head>
+<body>
+    <h1>PetCafe Validation Test</h1>
+    <p>Open the browser console and run:</p>
+    <pre>
+// Load validation module
+import('./src/validation/validate-all.js').then(module => {
+    // Run all tests
+    module.validateAll();
+    
+    // Or run quick check
+    // module.quickCheck();
+});
+    </pre>
+    <p>Or click the button below:</p>
+    <button onclick="runValidation()">Run Validation</button>
+    
+    <script>
+        async function runValidation() {
+            try {
+                const module = await import('./src/validation/validate-all.js');
+                module.validateAll();
+            } catch (error) {
+                console.error('Failed to load validation module:', error);
+                alert('Please run this from the game at http://localhost:3000');
+            }
+        }
+    </script>
+</body>
+</html>

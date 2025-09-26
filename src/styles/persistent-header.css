@@ -1,0 +1,354 @@
+/* Persistent Header - F2P Mobile Gacha Style */
+
+.persistent-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-height, 60px);
+  background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-md);
+  z-index: var(--z-header, 1000);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Player Section */
+.header-player {
+  display: flex;
+  align-items: center;
+}
+
+.player-portrait-btn {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.player-portrait-btn:hover {
+  transform: scale(1.05);
+}
+
+.player-portrait-btn:active {
+  transform: scale(0.98);
+}
+
+.player-portrait {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid #FFD700;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+  object-fit: cover;
+}
+
+.player-level {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #000;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+  border: 2px solid #1a1a1a;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Currency Section */
+.header-currencies {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-lg);
+  flex: 1;
+  justify-content: center;
+}
+
+.currency-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  transition: background 0.2s ease;
+}
+
+.currency-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Premium Currency (Diamonds) */
+.currency-premium {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 165, 0, 0.1) 100%);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.currency-premium .material-icons {
+  color: #FFD700;
+  filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5));
+}
+
+.currency-premium .currency-value {
+  color: #FFD700;
+  font-weight: 600;
+}
+
+/* Soft Currency (Coins) */
+.currency-soft .material-icons {
+  color: #C0C0C0;
+}
+
+.currency-soft .currency-value {
+  color: #E0E0E0;
+}
+
+/* Gacha Currency (Tickets) */
+.currency-gacha .material-icons {
+  color: #9370DB;
+}
+
+.currency-gacha .currency-value {
+  color: #B19CD9;
+}
+
+/* Social Currency (Subscribers) */
+.currency-social .material-icons {
+  color: #FFB6C1;
+}
+
+.currency-social .currency-value {
+  color: #FFB6C1;
+}
+
+/* Currency Values */
+.currency-value {
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 30px;
+  text-align: right;
+}
+
+/* Add Currency Button */
+.btn-add-currency {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background: #32CD32;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 4px;
+  box-shadow: 0 0 8px rgba(50, 205, 50, 0.4);
+}
+
+.btn-add-currency:hover {
+  background: #3CB371;
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(50, 205, 50, 0.6);
+}
+
+.btn-add-currency:active {
+  transform: scale(0.95);
+}
+
+.btn-add-currency .material-icons {
+  font-size: 16px;
+  color: white;
+}
+
+/* Right Section (Premium Currency + Actions) */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.btn-icon {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  color: #E0E0E0;
+}
+
+.btn-icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.btn-icon:active {
+  transform: scale(0.95);
+}
+
+.btn-icon .material-icons {
+  font-size: 24px;
+}
+
+/* Notification Badge */
+.notification-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #FF4444;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 5px;
+  border-radius: 10px;
+  min-width: 16px;
+  text-align: center;
+  border: 2px solid #1a1a1a;
+  animation: notification-bounce 0.5s ease;
+}
+
+@keyframes notification-bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+/* Currency Change Animations */
+@keyframes currency-increase {
+  0% {
+    color: inherit;
+  }
+  50% {
+    color: #32CD32;
+    transform: scale(1.1);
+  }
+  100% {
+    color: inherit;
+    transform: scale(1);
+  }
+}
+
+@keyframes currency-decrease {
+  0% {
+    color: inherit;
+  }
+  50% {
+    color: #FF4444;
+    transform: scale(0.9);
+  }
+  100% {
+    color: inherit;
+    transform: scale(1);
+  }
+}
+
+.currency-value.increasing {
+  animation: currency-increase 0.5s ease;
+}
+
+.currency-value.decreasing {
+  animation: currency-decrease 0.5s ease;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 480px) {
+  .persistent-header {
+    height: 56px;
+    padding: 0 var(--spacing-sm);
+  }
+  
+  .player-portrait-btn {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .player-portrait {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .header-currencies {
+    gap: var(--spacing-sm);
+  }
+  
+  .currency-item {
+    padding: 2px 6px;
+  }
+  
+  .currency-value {
+    font-size: 13px;
+  }
+  
+  .material-icons.icon-sm {
+    font-size: 18px;
+  }
+}
+
+/* Landscape Mode */
+@media (max-height: 600px) {
+  .persistent-header {
+    height: 48px;
+  }
+  
+  .player-portrait-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .player-portrait {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .player-level {
+    font-size: 10px;
+    padding: 1px 4px;
+  }
+}
+
+/* Screen-Specific Variations */
+/* Default: Show all currencies */
+.persistent-header .currency-item {
+  display: flex;
+}
+
+/* Cafe: Show coins and subscribers (diamonds always visible) */
+.persistent-header.header-variant-cafe .currency-gacha {
+  display: none;
+}
+
+/* Pets & Gacha: Show only tickets (diamonds always visible) */
+.persistent-header.header-variant-gacha .currency-soft,
+.persistent-header.header-variant-gacha .currency-social,
+.persistent-header.header-variant-collection .currency-soft,
+.persistent-header.header-variant-collection .currency-social {
+  display: none;
+}
+
+/* Messages: Show only diamonds (hide all others) */
+.persistent-header.header-variant-messages .currency-soft,
+.persistent-header.header-variant-messages .currency-gacha,
+.persistent-header.header-variant-messages .currency-social {
+  display: none;
+}
+
+/* Blog: Show only subscribers (diamonds always visible) */
+.persistent-header.header-variant-blog .currency-soft,
+.persistent-header.header-variant-blog .currency-gacha {
+  display: none;
+}

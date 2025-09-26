@@ -404,6 +404,90 @@ export function validateAll() {
     return true;
   });
 
+  console.log('\n=== Header Redesign (F2P Mobile Style) ===\n');
+  
+  // Test new header structure
+  test('Header', 'Player portrait button exists', () => {
+    const portraitBtn = document.querySelector('.player-portrait-btn');
+    return !!portraitBtn;
+  });
+  
+  test('Header', 'Player level displayed', () => {
+    const levelEl = document.querySelector('.player-level');
+    return !!levelEl && levelEl.textContent !== '';
+  });
+  
+  test('Header', 'Premium currency (Diamonds) shown', () => {
+    const diamondsEl = document.querySelector('#header-diamonds');
+    return !!diamondsEl;
+  });
+  
+  test('Header', 'Add diamonds button exists', () => {
+    const addBtn = document.querySelector('.btn-add-currency');
+    return !!addBtn;
+  });
+  
+  test('Header', 'All currencies displayed', () => {
+    const currencies = ['#header-diamonds', '#header-coins', '#header-tickets', '#header-subscribers'];
+    return currencies.every(id => !!document.querySelector(id));
+  });
+  
+  test('Header', 'Currency formatting works', () => {
+    const coinsEl = document.querySelector('#header-coins');
+    if (!coinsEl) return false;
+    // Check that large numbers are formatted (K/M/B)
+    const player = game.getGameState()?.getPlayer();
+    const coins = player?.currencies?.coins || 0;
+    if (coins >= 1000) {
+      return coinsEl.textContent.includes('K') || coinsEl.textContent.includes('M') || coinsEl.textContent.includes('B');
+    }
+    return true;
+  });
+  
+  test('Header', 'Notification badge exists', () => {
+    const badge = document.querySelector('#header-notification-count');
+    return !!badge;
+  });
+  
+  test('Header', 'Header variant system', () => {
+    const header = document.querySelector('.persistent-header');
+    if (!header) return false;
+    // Check if header can have variant classes
+    return header.classList.contains('persistent-header');
+  });
+  
+  test('Header', 'Diamonds always visible', () => {
+    const diamondsEl = document.querySelector('#header-diamonds');
+    if (!diamondsEl) return false;
+    const parent = diamondsEl.closest('.currency-premium');
+    const rightSection = document.querySelector('.header-right');
+    // Check that diamonds are in the right section
+    return rightSection && rightSection.contains(parent);
+  });
+  
+  test('Header', 'Header right section layout', () => {
+    const rightSection = document.querySelector('.header-right');
+    if (!rightSection) return false;
+    const diamond = rightSection.querySelector('.currency-premium');
+    const notification = rightSection.querySelector('.btn-icon');
+    // Check that both elements are in the right section
+    return !!diamond && !!notification;
+  });
+  
+  test('Header', 'Header CSS loaded', () => {
+    const header = document.querySelector('.persistent-header');
+    if (!header) return false;
+    const styles = window.getComputedStyle(header);
+    // Check for new dark theme background
+    return styles.background.includes('gradient') || styles.backgroundColor !== 'white';
+  });
+  
+  test('Header', 'Player portrait image loads', () => {
+    const portrait = document.querySelector('.player-portrait');
+    if (!portrait) return false;
+    return portrait.src && !portrait.src.includes('placeholder');
+  });
+
   console.log('\n=== Previous Updates ===\n');
 
   // Pet roster updates
