@@ -14,8 +14,12 @@ import { PetCollectionScreen } from '../ui/PetCollectionScreen';
 import { PetProfileScreen } from '../ui/PetProfileScreen';
 import { MemorySelectionScreen } from '../ui/MemorySelectionScreen';
 import { BlogScreen } from '../ui/BlogScreen';
+import { JournalScreen } from '../ui/JournalScreen';
+import { MemoryDetailScreen } from '../ui/MemoryDetailScreen';
+import { QuickShareModal } from '../ui/components/QuickShareModal';
 import { BlogPublisher } from '../systems/BlogPublisher';
 import { BondProgressionSystem } from '../systems/BondProgressionSystem';
+import { MemoryAchievementSystem } from '../systems/MemoryAchievementSystem';
 import { DMListScreen } from '../ui/DMListScreen';
 import { DMScreen } from '../ui/DMScreen';
 import { getPetById, getAllPets, getPetsByRarity } from '../utils/petData';
@@ -35,6 +39,7 @@ class PetCafeGame {
   private offlineSystem: OfflineProgressionSystem;
   private blogPublisher: BlogPublisher;
   private bondProgressionSystem: BondProgressionSystem;
+  private memoryAchievementSystem: MemoryAchievementSystem;
   private voiceCallOverlay: VoiceCallOverlay;
   private isInitialized: boolean = false;
 
@@ -53,6 +58,12 @@ class PetCafeGame {
     this.bondProgressionSystem = new BondProgressionSystem(this.eventSystem, this.gameState);
     new ScenePlayer(this.eventSystem);
     this.voiceCallOverlay = new VoiceCallOverlay(this.eventSystem);
+    
+    // Initialize UI components
+    new QuickShareModal(this.gameState, this.eventSystem, this.blogPublisher);
+    
+    // Initialize achievement system
+    this.memoryAchievementSystem = new MemoryAchievementSystem(this.eventSystem, this.gameState);
 
     this.setupSystemIntegration();
     this.setupEventListeners();
@@ -119,7 +130,7 @@ class PetCafeGame {
         );
         
         this.uiManager.registerScreen(screen);
-        this.uiManager.showScreen(screen.id, data);
+        this.uiManager.showScreen(screen.id, data.data);
       } else if (data.screenId === 'save-slots') {
         // Handle save slots screen specially
         const screen = new SaveSlotsScreen(
@@ -130,7 +141,7 @@ class PetCafeGame {
         );
         
         this.uiManager.registerScreen(screen);
-        this.uiManager.showScreen(screen.id, data);
+        this.uiManager.showScreen(screen.id, data.data);
       } else if (data.screenId === 'gacha') {
         // Handle gacha screen specially
         const screen = new GachaScreen(
@@ -141,7 +152,7 @@ class PetCafeGame {
         );
         
         this.uiManager.registerScreen(screen);
-        this.uiManager.showScreen(screen.id, data);
+        this.uiManager.showScreen(screen.id, data.data);
       } else if (data.screenId === 'pet-collection' || data.screenId === 'pets') {
         // Handle pet collection screen
         const screen = new PetCollectionScreen(
@@ -152,7 +163,7 @@ class PetCafeGame {
         );
         
         this.uiManager.registerScreen(screen);
-        this.uiManager.showScreen(screen.id, data);
+        this.uiManager.showScreen(screen.id, data.data);
       } else if (data.screenId === 'pet-profile') {
         // Handle pet profile screen
         // Check if screen already exists
@@ -179,7 +190,7 @@ class PetCafeGame {
         );
         
         this.uiManager.registerScreen(screen);
-        this.uiManager.showScreen(screen.id, data);
+        this.uiManager.showScreen(screen.id, data.data);
       } else if (data.screenId === 'blog') {
         // Handle blog screen
         const screen = new BlogScreen(
@@ -190,7 +201,27 @@ class PetCafeGame {
         );
         
         this.uiManager.registerScreen(screen);
-        this.uiManager.showScreen(screen.id, data);
+        this.uiManager.showScreen(screen.id, data.data);
+      } else if (data.screenId === 'journal') {
+        // Handle journal screen
+        const screen = new JournalScreen(
+          'journal',
+          this.eventSystem,
+          this.gameState
+        );
+        
+        this.uiManager.registerScreen(screen);
+        this.uiManager.showScreen(screen.id, data.data);
+      } else if (data.screenId === 'memory-detail') {
+        // Handle memory detail screen
+        const screen = new MemoryDetailScreen(
+          'memory-detail',
+          this.eventSystem,
+          this.gameState
+        );
+        
+        this.uiManager.registerScreen(screen);
+        this.uiManager.showScreen(screen.id, data.data);
       } else if (data.screenId === 'dm-list') {
         // Handle DM list screen
         const screen = new DMListScreen(
@@ -200,7 +231,7 @@ class PetCafeGame {
         );
         
         this.uiManager.registerScreen(screen);
-        this.uiManager.showScreen(screen.id, data);
+        this.uiManager.showScreen(screen.id, data.data);
       } else if (data.screenId === 'dm' && data.params?.npcId) {
         // Handle individual DM screen with unique ID per NPC
         const dmScreenId = `dm-${data.params.npcId}`;

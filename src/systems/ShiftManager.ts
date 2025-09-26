@@ -3,7 +3,7 @@ import { EventSystem, GameEvents } from './EventSystem';
 import { GameStateManager } from './GameState';
 import { RewardSystem } from './RewardSystem';
 import { MemoryGenerator } from './MemoryGenerator';
-import { Shift, ShiftStatus, ShiftRewards, CafeSection, SectionType } from '../models';
+import { Shift, ShiftStatus, ShiftRewards, CafeSection, SectionType, Memory } from '../models';
 
 export class ShiftManager {
   private eventSystem: EventSystem;
@@ -199,6 +199,7 @@ export class ShiftManager {
     this.rewardSystem.applyRewards(rewards, shift);
 
     // Generate memory if one was created
+    let generatedMemory: Memory | undefined;
     if (rewards.memoryCandidateId) {
       // Re-map to get the same Pet format
       const petsForMemory = playerPets.map(pp => ({
@@ -213,8 +214,8 @@ export class ShiftManager {
         },
         description: ''
       }));
-      const memory = this.memoryGenerator.generateMemory(shift, petsForMemory);
-      this.eventSystem.emit(GameEvents.MEMORY_CREATED, { memory, shiftId });
+      generatedMemory = this.memoryGenerator.generateMemory(shift, petsForMemory);
+      this.eventSystem.emit(GameEvents.MEMORY_CREATED, { memory: generatedMemory, shiftId });
     }
 
     // Clear timer
@@ -229,8 +230,12 @@ export class ShiftManager {
       section.currentShift = undefined;
     }
 
-    // Emit completion event
-    this.eventSystem.emit(GameEvents.SHIFT_COMPLETED, { shift, rewards, forced });
+    // Emit completion event with the generated memory
+    this.eventSystem.emit(GameEvents.SHIFT_COMPLETED, { 
+      shift, 
+      rewards: generatedMemory ? { ...rewards, generatedMemory } : rewards, 
+      forced 
+    });
 
     console.log(`[ShiftManager] Completed shift ${shiftId}`, rewards);
     

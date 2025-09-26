@@ -21,6 +21,8 @@ export interface Player {
   settings: PlayerSettings;
   statistics: PlayerStatistics;
   conversations?: ConversationData; // DM conversation history
+  unlockedAchievements?: string[]; // Achievement IDs
+  unlockedTitles?: string[]; // Earned titles
 }
 
 export interface PlayerProfile {

@@ -59,6 +59,18 @@ export abstract class UnifiedBaseScreen extends BaseScreen {
   }
 
   /**
+   * Default implementation of lifecycle methods
+   * Subclasses can override and call super if needed
+   */
+  onShow(data?: any): void {
+    // Default implementation - subclasses can override
+  }
+
+  onHide(): void {
+    // Default implementation - subclasses can override
+  }
+
+  /**
    * Override show to manage navigation visibility
    */
   override show(data?: any): void {

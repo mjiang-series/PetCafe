@@ -1,0 +1,559 @@
+import { UnifiedBaseScreen } from './UnifiedBaseScreen';
+import { ScreenHeaderConfig } from './components/ScreenHeader';
+import { Memory } from '../models';
+import { GameState } from '../systems/GameState';
+import { EventSystem } from '../systems/EventSystem';
+import { getAssetPath } from '../utils/AssetPaths';
+import { getNPCById } from '../utils/NPCData';
+
+interface FilterState {
+  section: 'all' | 'bakery' | 'playground' | 'salon';
+  npc: 'all' | 'aria' | 'kai' | 'elias';
+  mood: 'all' | string;
+  special: 'all' | 'unviewed' | 'shared' | 'favorited';
+}
+
+export class JournalScreen extends UnifiedBaseScreen {
+  private memories: Memory[] = [];
+  private filteredMemories: Memory[] = [];
+  private filters: FilterState = {
+    section: 'all',
+    npc: 'all',
+    mood: 'all',
+    special: 'all'
+  };
+  private calendarData: Map<string, number> = new Map();
+  private currentMonth: Date = new Date();
+  private isLoading = false;
+  private memoryContainer: HTMLElement | null = null;
+
+  constructor(id: string, eventSystem: EventSystem, gameState: GameState) {
+    super(id, eventSystem, gameState);
+  }
+
+  protected getScreenHeaderConfig(): ScreenHeaderConfig | null {
+    return {
+      title: 'Memory Journal',
+      showBack: false
+    };
+  }
+
+  protected createContent(): string {
+    return `
+      <div class="journal-screen">
+        <div class="journal-header">
+          <div class="journal-stats">
+            <div class="stat-item">
+              <span class="stat-label">Memories This Week</span>
+              <span class="stat-value" id="memories-this-week">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Total Days</span>
+              <span class="stat-value" id="total-days">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Total Memories</span>
+              <span class="stat-value" id="total-memories">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="calendar-widget">
+          <div class="calendar-header">
+            <button class="calendar-nav" id="prev-month">
+              <span class="material-icons">chevron_left</span>
+            </button>
+            <h3 class="calendar-month" id="current-month">January 2024</h3>
+            <button class="calendar-nav" id="next-month">
+              <span class="material-icons">chevron_right</span>
+            </button>
+          </div>
+          <div class="calendar-grid" id="calendar-grid">
+            <!-- Calendar days will be generated here -->
+          </div>
+        </div>
+
+        <div class="npc-filter-bar">
+          <button class="npc-filter-option active" data-npc="all">
+            <span class="filter-icon material-icons">apps</span>
+            <span class="filter-label">All</span>
+            <span class="memory-count">${this.memories.length}</span>
+          </button>
+          
+          <button class="npc-filter-option" data-npc="aria">
+            <img src="${getAssetPath('art/npc/aria/aria_portrait.png')}" alt="Aria" class="npc-portrait-small" />
+            <span class="filter-label">Aria</span>
+            <span class="memory-count">0</span>
+          </button>
+          
+          <button class="npc-filter-option" data-npc="kai">
+            <img src="${getAssetPath('art/npc/kai/kai_portrait.png')}" alt="Kai" class="npc-portrait-small" />
+            <span class="filter-label">Kai</span>
+            <span class="memory-count">0</span>
+          </button>
+          
+          <button class="npc-filter-option" data-npc="elias">
+            <img src="${getAssetPath('art/npc/elias/elias_portrait.png')}" alt="Elias" class="npc-portrait-small" />
+            <span class="filter-label">Elias</span>
+            <span class="memory-count">0</span>
+          </button>
+          
+          <button class="npc-filter-option" data-npc="none">
+            <span class="filter-icon material-icons">person_off</span>
+            <span class="filter-label">None</span>
+            <span class="memory-count">0</span>
+          </button>
+        </div>
+
+        <div class="memory-timeline" id="memory-timeline">
+          <div class="timeline-content" id="timeline-content">
+            <!-- Memory cards will be generated here -->
+          </div>
+          <div class="loading-indicator" id="loading-indicator">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  protected setupEventListeners(): void {
+    super.setupEventListeners();
+
+    // Calendar navigation
+    this.addClickHandler('#prev-month', () => this.navigateMonth(-1));
+    this.addClickHandler('#next-month', () => this.navigateMonth(1));
+
+    // NPC filter options
+    this.element.querySelectorAll('.npc-filter-option').forEach(option => {
+      option.addEventListener('click', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const npcValue = target.dataset.npc || 'all';
+        
+        // Update active state
+        this.element.querySelectorAll('.npc-filter-option').forEach(opt => {
+          opt.classList.remove('active');
+        });
+        target.classList.add('active');
+        
+        // Update filter
+        this.filters.npc = npcValue as any;
+        this.applyFilters();
+        this.updateMemoryDisplay();
+      });
+    });
+
+    // Memory timeline scroll
+    const timeline = this.element.querySelector('#memory-timeline');
+    if (timeline) {
+      timeline.addEventListener('scroll', () => this.handleScroll());
+    }
+
+    // Listen for memory updates
+    this.eventSystem.on('memory:created', () => this.loadMemories());
+    this.eventSystem.on('memory:shared', () => this.loadMemories());
+    this.eventSystem.on('memory:viewed', () => this.updateStats());
+  }
+
+  onShow(): void {
+    this.loadMemories();
+    this.updateCalendar();
+    this.updateStats();
+    
+    // Mark this screen as opened
+    this.eventSystem.emit('journal:opened', {});
+  }
+
+  private loadMemories(): void {
+    const player = this.gameState.getPlayer();
+    this.memories = player.memories || [];
+    
+    // Build calendar data
+    this.buildCalendarData();
+    
+    // Apply filters
+    this.applyFilters();
+    
+    // Update display
+    this.updateMemoryDisplay();
+  }
+
+  private buildCalendarData(): void {
+    this.calendarData.clear();
+    
+    this.memories.forEach(memory => {
+      const date = new Date(memory.timestamp);
+      const dateKey = this.getDateKey(date);
+      
+      const count = this.calendarData.get(dateKey) || 0;
+      this.calendarData.set(dateKey, count + 1);
+    });
+  }
+
+  private getDateKey(date: Date): string {
+    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+  }
+
+  private updateFilter(filterType: keyof FilterState, value: string): void {
+    // Update filter state
+    this.filters[filterType] = value as any;
+    
+    // Update UI
+    const filterGroup = this.element.querySelector(`[data-filter="${filterType}"]`)?.parentElement;
+    if (filterGroup) {
+      filterGroup.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.classList.remove('active');
+      });
+      
+      const activeChip = filterGroup.querySelector(`[data-value="${value}"]`);
+      if (activeChip) {
+        activeChip.classList.add('active');
+      }
+    }
+    
+    // Apply filters and update display
+    this.applyFilters();
+    this.updateMemoryDisplay();
+  }
+
+  private applyFilters(): void {
+    this.filteredMemories = this.memories.filter(memory => {
+      // Section filter
+      if (this.filters.section !== 'all' && memory.location !== this.filters.section) {
+        return false;
+      }
+      
+      // NPC filter
+      if (this.filters.npc !== 'all') {
+        if (this.filters.npc === 'none') {
+          // Filter for memories with no NPCs
+          const hasAnyNPC = (memory.taggedNPCs && memory.taggedNPCs.length > 0) || 
+                           (memory.taggedNpcs && memory.taggedNpcs.length > 0);
+          if (hasAnyNPC) return false;
+        } else {
+          // Filter for specific NPC
+          const hasNPC = memory.taggedNPCs?.includes(this.filters.npc) || 
+                         memory.taggedNpcs?.includes(this.filters.npc);
+          if (!hasNPC) return false;
+        }
+      }
+      
+      // Special filters
+      if (this.filters.special !== 'all') {
+        switch (this.filters.special) {
+          case 'unviewed':
+            if (memory.viewed) return false;
+            break;
+          case 'shared':
+            if (!memory.isPublished) return false;
+            break;
+          case 'favorited':
+            if (!memory.favorited) return false;
+            break;
+        }
+      }
+      
+      return true;
+    });
+    
+    // Sort by timestamp (newest first)
+    this.filteredMemories.sort((a, b) => b.timestamp - a.timestamp);
+  }
+
+  private updateMemoryDisplay(): void {
+    const container = this.element.querySelector('#timeline-content');
+    if (!container) return;
+    
+    if (this.filteredMemories.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <span class="material-icons">photo_camera</span>
+          <p>No memories found</p>
+          <p class="empty-hint">Complete shifts to create new memories!</p>
+        </div>
+      `;
+      return;
+    }
+    
+    // Group memories by date
+    const memoryGroups = new Map<string, Memory[]>();
+    
+    this.filteredMemories.forEach(memory => {
+      const date = new Date(memory.timestamp);
+      const dateKey = this.formatDateHeader(date);
+      
+      if (!memoryGroups.has(dateKey)) {
+        memoryGroups.set(dateKey, []);
+      }
+      memoryGroups.get(dateKey)!.push(memory);
+    });
+    
+    // Build HTML
+    let html = '';
+    
+    memoryGroups.forEach((memories, dateHeader) => {
+      html += `
+        <div class="date-group">
+          <h3 class="date-header">${dateHeader}</h3>
+          <div class="memory-cards">
+      `;
+      
+      memories.forEach(memory => {
+        html += this.createMemoryCard(memory);
+      });
+      
+      html += `
+          </div>
+        </div>
+      `;
+    });
+    
+    container.innerHTML = html;
+    
+    // Setup click handlers for memory cards
+    container.querySelectorAll('.memory-preview-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        const memoryId = (e.currentTarget as HTMLElement).dataset.memoryId;
+        if (memoryId) {
+          this.viewMemory(memoryId);
+        }
+      });
+    });
+  }
+
+  private createMemoryCard(memory: Memory): string {
+    const date = new Date(memory.timestamp);
+    const timeStr = date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit' 
+    });
+    
+    // Truncate content for snippet
+    const snippet = memory.content.length > 80 
+      ? memory.content.substring(0, 80) + '...' 
+      : memory.content;
+    
+    return `
+      <div class="memory-preview-card ${!memory.viewed ? 'unviewed' : ''}" data-memory-id="${memory.id || memory.memoryId}">
+        <div class="memory-preview-image">
+          <img src="${getAssetPath(memory.imageUrl || 'art/memories_image_placeholder.png')}" alt="Memory" />
+          <span class="memory-mood-badge mood--${memory.mood}">${memory.mood}</span>
+          ${!memory.viewed ? '<span class="new-badge">NEW</span>' : ''}
+        </div>
+        <div class="memory-preview-content">
+          <div class="memory-timestamp">
+            <span class="material-icons">schedule</span>
+            <span>${timeStr}</span>
+          </div>
+          <p class="memory-snippet">${snippet}</p>
+        </div>
+      </div>
+    `;
+  }
+
+  private formatDateHeader(date: Date): string {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    const dateStr = date.toDateString();
+    const todayStr = today.toDateString();
+    const yesterdayStr = yesterday.toDateString();
+    
+    if (dateStr === todayStr) {
+      return 'Today';
+    } else if (dateStr === yesterdayStr) {
+      return 'Yesterday';
+    } else {
+      return date.toLocaleDateString('en-US', { 
+        weekday: 'long', 
+        month: 'short', 
+        day: 'numeric' 
+      });
+    }
+  }
+
+  private navigateMonth(direction: number): void {
+    this.currentMonth.setMonth(this.currentMonth.getMonth() + direction);
+    this.updateCalendar();
+  }
+
+  private updateCalendar(): void {
+    const monthElement = this.element.querySelector('#current-month');
+    if (monthElement) {
+      monthElement.textContent = this.currentMonth.toLocaleDateString('en-US', { 
+        month: 'long', 
+        year: 'numeric' 
+      });
+    }
+    
+    const grid = this.element.querySelector('#calendar-grid');
+    if (!grid) return;
+    
+    // Clear existing calendar
+    grid.innerHTML = '';
+    
+    // Add day headers
+    const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    dayHeaders.forEach(day => {
+      const header = document.createElement('div');
+      header.className = 'calendar-day-header';
+      header.textContent = day;
+      grid.appendChild(header);
+    });
+    
+    // Get first day of month and number of days
+    const firstDay = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth(), 1);
+    const lastDay = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth() + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+    
+    // Add empty cells for days before month starts
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      const emptyDay = document.createElement('div');
+      emptyDay.className = 'calendar-day empty';
+      grid.appendChild(emptyDay);
+    }
+    
+    // Add days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(this.currentMonth.getFullYear(), this.currentMonth.getMonth(), day);
+      const dateKey = this.getDateKey(date);
+      const memoryCount = this.calendarData.get(dateKey) || 0;
+      
+      const dayElement = document.createElement('div');
+      dayElement.className = 'calendar-day';
+      if (memoryCount > 0) {
+        dayElement.classList.add('has-memories');
+        dayElement.dataset.count = memoryCount.toString();
+      }
+      
+      // Check if it's today
+      const today = new Date();
+      if (date.toDateString() === today.toDateString()) {
+        dayElement.classList.add('today');
+      }
+      
+      dayElement.innerHTML = `
+        <span class="day-number">${day}</span>
+        ${memoryCount > 0 ? `<span class="memory-dot">${memoryCount}</span>` : ''}
+      `;
+      
+      // Add click handler
+      if (memoryCount > 0) {
+        dayElement.addEventListener('click', () => {
+          this.jumpToDate(date);
+        });
+      }
+      
+      grid.appendChild(dayElement);
+    }
+  }
+
+  private jumpToDate(date: Date): void {
+    // Find first memory from this date
+    const dateKey = this.formatDateHeader(date);
+    const dateGroup = this.element.querySelector(`.date-header`);
+    
+    // Find the matching date header and scroll to it
+    this.element.querySelectorAll('.date-header').forEach(header => {
+      if (header.textContent === dateKey) {
+        header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  }
+
+  private updateStats(): void {
+    // Total memories
+    const totalElement = this.element.querySelector('#total-memories');
+    if (totalElement) {
+      totalElement.textContent = this.memories.length.toString();
+    }
+    
+    // Total days
+    const daysElement = this.element.querySelector('#total-days');
+    if (daysElement) {
+      daysElement.textContent = this.calendarData.size.toString();
+    }
+    
+    // Memories this week
+    const weekElement = this.element.querySelector('#memories-this-week');
+    if (weekElement) {
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      const memoriesThisWeek = this.memories.filter(m => 
+        new Date(m.timestamp) >= oneWeekAgo
+      ).length;
+      weekElement.textContent = memoriesThisWeek.toString();
+    }
+    
+    // Update NPC filter counts
+    this.updateNPCFilterCounts();
+  }
+
+  private updateNPCFilterCounts(): void {
+    const npcCounts: Record<string, number> = {
+      aria: 0,
+      kai: 0,
+      elias: 0,
+      none: 0
+    };
+    
+    this.memories.forEach(memory => {
+      const npcs = memory.taggedNPCs || memory.taggedNpcs || [];
+      if (npcs.length === 0) {
+        npcCounts.none++;
+      } else {
+        npcs.forEach(npcId => {
+          if (npcCounts[npcId] !== undefined) {
+            npcCounts[npcId]++;
+          }
+        });
+      }
+    });
+    
+    // Update UI
+    Object.entries(npcCounts).forEach(([npcId, count]) => {
+      const element = this.element.querySelector(`.npc-filter-option[data-npc="${npcId}"] .memory-count`);
+      if (element) {
+        element.textContent = count.toString();
+      }
+    });
+    
+    // Update "All" count
+    const allElement = this.element.querySelector('.npc-filter-option[data-npc="all"] .memory-count');
+    if (allElement) {
+      allElement.textContent = this.memories.length.toString();
+    }
+  }
+
+  private handleScroll(): void {
+    // Implement infinite scroll loading if needed in the future
+    // For now, all memories are loaded at once
+  }
+
+  private viewMemory(memoryId: string): void {
+    const memory = this.memories.find(m => m.id === memoryId || m.memoryId === memoryId);
+    if (!memory) return;
+    
+    // Mark as viewed
+    if (!memory.viewed) {
+      memory.viewed = true;
+      this.gameState.updatePlayer({
+        memories: this.memories
+      });
+      
+      // Update badge count
+      this.eventSystem.emit('memory:viewed', { memoryId });
+      
+      // Update display
+      this.updateMemoryDisplay();
+    }
+    
+    // Navigate to detail view
+    this.eventSystem.emit('ui:show_screen', {
+      screenId: 'memory-detail',
+      data: { memoryId }
+    });
+  }
+}

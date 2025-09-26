@@ -217,6 +217,8 @@ export class PersistentHeader {
         variant = 'collection';
       } else if (this.parentScreen === 'blog') {
         variant = 'blog';
+      } else if (this.parentScreen === 'journal') {
+        variant = 'journal';
       }
     } else {
       // Check for specific screens and their children
@@ -235,6 +237,9 @@ export class PersistentHeader {
       } else if (screenId === 'blog' || screenId.includes('post') || screenId.includes('blog')) {
         // Blog and individual posts
         variant = 'blog';
+      } else if (screenId === 'journal' || screenId.includes('memory-detail') || screenId.includes('memory')) {
+        // Journal and memory screens
+        variant = 'journal';
       }
     }
     

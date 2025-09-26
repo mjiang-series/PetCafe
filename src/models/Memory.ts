@@ -1,19 +1,26 @@
 // Memory and blog post interfaces
 export interface Memory {
-  memoryId: string;
+  id: string; // unique memory ID
+  memoryId: string; // legacy field for compatibility
   shiftId: string; // shift that generated this memory
-  content: string; // the actual memory text
+  content: string; // the actual memory text (short snippet)
+  extendedStory?: string; // extended narrative (100 words max)
   imageUrl?: string | undefined; // placeholder image URL
-  taggedNpcs: string[]; // NPCs mentioned in the memory
+  taggedNPCs?: string[]; // NPCs mentioned in the memory
+  taggedNpcs: string[]; // legacy field for compatibility
   mood: string; // emotional tone of the memory
   likes: number;
   views: number;
   isPublished: boolean;
   createdAt: number;
+  timestamp: number; // when the memory was created
   publishedAt?: number | undefined;
   location: string; // section name
   petIds: string[]; // pets involved
   caption?: string | undefined; // player-added caption when publishing
+  viewed?: boolean; // has the player viewed this memory
+  favorited?: boolean; // has the player favorited this memory
+  rarity?: 'common' | 'rare' | 'epic'; // memory rarity
 }
 
 export interface MemoryContent {

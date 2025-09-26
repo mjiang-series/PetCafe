@@ -3,6 +3,7 @@ import { EventSystem } from '../../systems/EventSystem';
 import { GameStateManager } from '../../systems/GameState';
 import { ShiftRewards } from '../../models/Shift';
 import { getNPCById } from '../../utils/npcData';
+import { getAssetPath } from '../../utils/AssetPaths';
 
 export interface ShiftRewardsData {
   shift: any;
@@ -193,17 +194,54 @@ export class ShiftRewardsModal {
   }
 
   private createMemorySection(rewards: ShiftRewards): string {
-    if (!rewards.memoryCandidateId) return '';
+    // Check if we have a generated memory directly in rewards
+    const memory = (rewards as any).generatedMemory;
     
+    if (!memory && !rewards.memoryCandidateId) {
+      console.log('[ShiftRewardsModal] No memory in rewards');
+      return '';
+    }
+    
+    if (!memory) {
+      console.log('[ShiftRewardsModal] Memory candidate ID exists but no memory object, showing fallback');
+      // Fallback to simple notification if memory not found yet
+      return `
+        <div class="memory-section">
+          <div class="memory-created">
+            <span class="memory-icon material-icons">photo_camera</span>
+            <span class="memory-text">New Memory Created!</span>
+          </div>
+          <p class="memory-hint">Check your journal to relive this moment!</p>
+        </div>
+      `;
+    }
+    
+    console.log('[ShiftRewardsModal] Memory found:', memory);
+    
+    // Show memory preview card
     return `
       <div class="memory-section">
-        <div class="memory-created">
-          <span class="memory-icon material-icons">photo_camera</span>
-          <span class="memory-text">New Memory Created!</span>
+        <h3>Memory Captured!</h3>
+        <div class="memory-preview-card">
+          <div class="memory-preview-image">
+            <img src="${getAssetPath(memory.imageUrl || 'art/memories_image_placeholder.png')}" alt="Memory" />
+            <span class="memory-mood-badge mood--${memory.mood}">${memory.mood}</span>
+          </div>
+          <div class="memory-preview-content">
+            <p class="memory-snippet">${this.truncateText(memory.content, 80)}</p>
+            <button class="btn-secondary view-memory-btn">
+              <span class="material-icons">menu_book</span>
+              <span>View in Journal</span>
+            </button>
+          </div>
         </div>
-        <p class="memory-hint">Check your memories to publish it to your blog!</p>
       </div>
     `;
+  }
+  
+  private truncateText(text: string, maxLength: number): string {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength).trim() + '...';
   }
 
   private getNPCReaction(npcId: string, rewards: ShiftRewards): string {
@@ -260,6 +298,14 @@ export class ShiftRewardsModal {
     // Collect button
     const collectBtn = this.element?.querySelector('.collect-btn');
     collectBtn?.addEventListener('click', () => this.close());
+    
+    // View in Journal button
+    const viewMemoryBtn = this.element?.querySelector('.view-memory-btn');
+    viewMemoryBtn?.addEventListener('click', () => {
+      this.close();
+      // Navigate to journal screen (will be implemented when journal screen exists)
+      this.eventSystem.emit('ui:show_screen', { screenId: 'journal' });
+    });
     
     // ESC key
     const handleEsc = (e: KeyboardEvent) => {

@@ -21,7 +21,7 @@ export class BottomNavigation {
     { id: 'pets', icon: 'pets', label: 'Pets', screenId: 'pet-collection' },
     { id: 'gacha', icon: 'volunteer_activism', label: 'Adopt', screenId: 'gacha' },
     { id: 'messages', icon: 'chat_bubble', label: 'Messages', screenId: 'dm-list' },
-    { id: 'blog', icon: 'article', label: 'Blog', screenId: 'blog' }
+    { id: 'journal', icon: 'menu_book', label: 'Journal', screenId: 'journal' }
   ];
 
   constructor(eventSystem: EventSystem, gameState: GameStateManager) {
@@ -83,6 +83,15 @@ export class BottomNavigation {
     this.eventSystem.on('ui:screen_shown', (data: { screenId: string }) => {
       this.updateActiveState(data.screenId);
     });
+    
+    // Listen for memory updates
+    this.eventSystem.on('memory:created', () => {
+      this.updateJournalBadge();
+    });
+    
+    this.eventSystem.on('memory:viewed', () => {
+      this.updateJournalBadge();
+    });
   }
 
   private handleNavigation(navId: string, screenId: string): void {
@@ -121,6 +130,9 @@ export class BottomNavigation {
     const unreadCount = this.gameState.getTotalUnreadMessages();
     console.log('[BottomNavigation] Unread messages:', unreadCount);
     this.updateBadge('messages', unreadCount);
+    
+    // Update journal badge
+    this.updateJournalBadge();
   }
 
   private updatePetsBadge(): void {
@@ -135,6 +147,14 @@ export class BottomNavigation {
     }
   }
 
+  private updateJournalBadge(): void {
+    const player = this.gameState.getPlayer();
+    const memories = player.memories || [];
+    // Count unviewed memories
+    const unviewedCount = memories.filter(m => !m.viewed).length;
+    this.updateBadge('journal', unviewedCount);
+  }
+  
   private updateBadge(navId: string, count: number): void {
     const badge = this.element.querySelector(`[data-badge="${navId}"]`) as HTMLElement;
     if (badge) {

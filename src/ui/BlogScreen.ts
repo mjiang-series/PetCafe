@@ -25,17 +25,20 @@ export class BlogScreen extends UnifiedBaseScreen {
   }
 
   protected getScreenHeaderConfig(): ScreenHeaderConfig | null {
-    // Main navigation screen - no header needed
-    return null;
+    return {
+      title: 'Cafe Moments',
+      showBack: true,
+      parentScreen: 'cafe-overview'
+    };
   }
 
   protected createContent(): string {
     return `
       <div class="blog-container">
         <div class="blog-header-section">
-          <h2 class="blog-title">Your Blog</h2>
+          <h2 class="blog-title">Cafe Moments</h2>
           <button class="btn btn--primary" data-action="new-post">
-            <span class="icon-emoji">➕</span> New Post
+            <span class="icon-emoji">➕</span> Share a Moment
           </button>
         </div>
  
@@ -46,7 +49,7 @@ export class BlogScreen extends UnifiedBaseScreen {
         <div class="blog-stats">
         <div class="stat-item">
           <span class="stat-value" id="total-posts">0</span>
-          <span class="stat-label">Posts</span>
+          <span class="stat-label">Moments</span>
         </div>
         <div class="stat-item">
           <span class="stat-value" id="total-likes">0</span>
@@ -92,7 +95,10 @@ export class BlogScreen extends UnifiedBaseScreen {
     super.setupEventListeners();
 
     this.addClickHandler('[data-action="new-post"]', () => {
-      this.eventSystem.emit('ui:show_screen', { screenId: 'memory-selection' });
+    // Show memory selection for sharing
+    this.eventSystem.emit('ui:show_screen', { 
+      screenId: 'memory-selection'
+    });
     });
 
     // Listen for new posts

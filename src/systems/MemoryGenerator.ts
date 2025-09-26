@@ -53,6 +53,25 @@ const MEMORY_MOODS = [
   'adorable', 'mischievous', 'cozy', 'energetic', 'sleepy'
 ];
 
+// Extended story templates (100 words max each)
+const EXTENDED_STORY_TEMPLATES: Record<SectionType, string[]> = {
+  'bakery': [
+    'The warm aroma of fresh bread filled the air as {npc} kneaded dough with practiced hands. {pet1} watched intently, occasionally batting at flour clouds that drifted by. When {npc} turned to check the oven, {pet1} left tiny paw prints across the counter, creating an impromptu art piece. {npc} laughed softly, deciding to preserve the moment by tracing around the prints before cleaning up.',
+    'Sunlight streamed through the bakery windows, casting golden rays across {npc}\'s workspace. {pet1} had claimed a warm spot near the proving drawer, purring contentedly. As {npc} decorated cupcakes, {pet1} would occasionally chirp suggestions, earning gentle scratches behind the ears. The finished treats sparkled with edible glitter, each one a tiny masterpiece inspired by their furry muse.',
+    '{npc} discovered {pet1} had somehow opened the sprinkles drawer, creating a rainbow cascade across the floor. Instead of scolding, {npc} grabbed a camera, capturing {pet1}\'s guilty but adorable expression. Together they turned cleanup into a game, with {pet1} batting escaped sprinkles into piles while {npc} swept, both enjoying the unexpected break in routine.'
+  ],
+  'playground': [
+    'The afternoon sun warmed the playground as {npc} set up an obstacle course. {pet1} approached cautiously at first, then bounded through with increasing confidence. Each successful jump earned enthusiastic cheers from {npc}, who documented every triumph with sketches. By the end, {pet1} pranced proudly, tail high, having conquered every challenge and earned a special treat.',
+    '{npc} introduced a new toy - a feather wand that danced through the air like a butterfly. {pet1}\'s eyes grew wide, pupils dilating as hunting instincts kicked in. For twenty minutes they played, {pet1} leaping impossibly high while {npc} laughed at the acrobatic displays. Eventually, {pet1} caught the prize, carrying it triumphantly to their favorite napping spot.',
+    'Rain pattered against the windows, but inside the playground stayed bright and cheerful. {npc} built a blanket fort, and {pet1} immediately claimed it as their castle. They spent the afternoon reading stories together, {pet1} purring loudly whenever {npc} did character voices. The cozy hideaway became their secret base, where imagination ruled supreme.'
+  ],
+  'salon': [
+    '{npc} prepared the grooming station with practiced precision, each tool arranged just so. {pet1} sat regally on the cushioned platform, accepting the attention as their due. Gentle brush strokes revealed {pet1}\'s lustrous coat, while {npc} hummed softly. The session became a meditation for both, ending with {pet1} looking magnificent and {npc} feeling deeply satisfied.',
+    'Today\'s spa treatment included a new lavender-scented shampoo that {npc} had specially ordered. {pet1} initially protested the bath but soon relaxed under {npc}\'s skilled hands. The massage that followed had {pet1} purring so loudly it echoed through the salon. {npc} smiled, knowing this blissful state was the highest compliment to their craft.',
+    '{npc} noticed {pet1} had been grooming themselves excessively, a sign of stress. Setting aside the usual routine, {npc} simply sat with {pet1}, offering gentle pets and quiet reassurance. Gradually, {pet1} relaxed, eventually falling asleep in {npc}\'s lap. Sometimes the best grooming session was just being present for a friend in need.'
+  ]
+};
+
 export class MemoryGenerator {
   private eventSystem: EventSystem;
   private gameState: GameStateManager;
@@ -65,21 +84,29 @@ export class MemoryGenerator {
   generateMemory(shift: Shift, assignedPets: Pet[]): Memory {
     const template = this.selectTemplate(shift.sectionType, assignedPets);
     const content = this.fillTemplate(template, assignedPets, shift.helperNpcId);
+    const extendedStory = this.generateExtendedStory(shift, assignedPets, content);
     const mood = this.selectMood();
     
+    const memoryId = `memory_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const memory: Memory = {
-      memoryId: `memory_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: memoryId,
+      memoryId: memoryId,
       shiftId: shift.shiftId,
       content: content,
+      extendedStory: extendedStory,
       imageUrl: this.generateImageUrl(shift, assignedPets),
+      taggedNPCs: [shift.helperNpcId],
       taggedNpcs: [shift.helperNpcId],
       mood: mood,
       likes: 0,
       views: 0,
       isPublished: false,
       createdAt: Date.now(),
+      timestamp: Date.now(),
       location: this.getSectionName(shift.sectionType),
-      petIds: assignedPets.map(p => p.petId)
+      petIds: assignedPets.map(p => p.petId),
+      viewed: false,
+      favorited: false
     };
 
     this.gameState.addMemory(memory);
@@ -127,7 +154,20 @@ export class MemoryGenerator {
     if (scene?.background) {
       return scene.background;
     }
-    return AssetPaths.scenePlaceholder(shift.sectionType);
+    
+    // Use different placeholders based on whether pets were assigned
+    if (pets.length === 0) {
+      // No pets - focus on NPC only
+      return 'art/memories_image_placeholder_npc_only.png';
+    } else {
+      // Has pets - randomly choose between pet-only or NPC+pet combo
+      const usePetOnly = Math.random() < 0.5;
+      if (usePetOnly) {
+        return 'art/memories_image_placeholder_pet_only.png';
+      } else {
+        return 'art/memories_image_placeholder.png'; // Default NPC+pet combo
+      }
+    }
   }
 
   private findSceneForNpc(npcId: string) {
@@ -146,6 +186,31 @@ export class MemoryGenerator {
   private getRecentPetForNpc(npcId: string) {
     const player = this.gameState.getState().player;
     return player.recentPetAcquisitions?.find(record => record.npcId === npcId);
+  }
+
+  private generateExtendedStory(shift: Shift, pets: Pet[], snippet: string): string {
+    const templates = EXTENDED_STORY_TEMPLATES[shift.sectionType] || EXTENDED_STORY_TEMPLATES['bakery'];
+    const template = templates[Math.floor(Math.random() * templates.length)];
+    
+    let story = template;
+    
+    // Replace placeholders
+    if (pets.length > 0) {
+      story = story.replace(/{pet1}/g, pets[0].name);
+      if (pets.length > 1) {
+        story = story.replace(/{pet2}/g, pets[1].name);
+      } else {
+        story = story.replace(/{pet2}/g, pets[0].name);
+      }
+    } else {
+      // No pets scenario - use a default pet name
+      story = story.replace(/{pet1}/g, 'a curious visitor');
+      story = story.replace(/{pet2}/g, 'another visitor');
+    }
+    
+    story = story.replace(/{npc}/g, this.getNpcName(shift.helperNpcId));
+    
+    return story;
   }
 
   private getNpcName(npcId: string): string {

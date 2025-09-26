@@ -336,3 +336,9 @@
 .persistent-header.header-variant-blog .currency-gacha {
   display: none;
 }
+
+/* Journal: Show only subscribers (diamonds always visible) */
+.persistent-header.header-variant-journal .currency-soft,
+.persistent-header.header-variant-journal .currency-gacha {
+  display: none;
+}

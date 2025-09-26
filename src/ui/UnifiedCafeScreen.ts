@@ -2,7 +2,7 @@
 import { UnifiedBaseScreen } from './UnifiedBaseScreen';
 import { EventSystem } from '../systems/EventSystem';
 import { GameStateManager } from '../systems/GameState';
-import { AssetPaths } from '../utils/assetPaths';
+import { AssetPaths, getAssetPath } from '../utils/assetPaths';
 import { ScreenHeaderConfig } from './components/ScreenHeader';
 
 export class UnifiedCafeScreen extends UnifiedBaseScreen {
@@ -76,6 +76,22 @@ export class UnifiedCafeScreen extends UnifiedBaseScreen {
         </div>
       </section>
 
+      <!-- Cafe Stories Section -->
+      <section class="sections-grid cafe-stories-section">
+        <h3 class="section-title">Café Stories</h3>
+        
+        <div class="section-card" data-section="blog">
+          <div class="section-card__image">
+            <img src="${getAssetPath('art/ui/blog_placeholder.png')}" alt="Cafe Moments" />
+          </div>
+          <div class="section-card__content">
+            <h4>Cafe Moments</h4>
+            <p>Share special moments</p>
+            <span class="status-badge status--blog">Ready to Post</span>
+          </div>
+        </div>
+      </section>
+
     `;
   }
 
@@ -112,7 +128,9 @@ export class UnifiedCafeScreen extends UnifiedBaseScreen {
     this.element.querySelectorAll('.section-card:not(.section-card--locked)').forEach(card => {
       card.addEventListener('click', () => {
         const section = card.getAttribute('data-section');
-        if (section) {
+        if (section === 'blog') {
+          this.eventSystem.emit('ui:show_screen', { screenId: 'blog' });
+        } else if (section) {
           this.navigateToSection(section);
         }
       });
@@ -187,6 +205,9 @@ export class UnifiedCafeScreen extends UnifiedBaseScreen {
       }
     });
 
+    // Update blog status
+    this.updateBlogStatus();
+    
     this.updateSpotlight(player);
   }
 
@@ -329,6 +350,34 @@ export class UnifiedCafeScreen extends UnifiedBaseScreen {
         return 'elias';
       default:
         return 'aria';
+    }
+  }
+  
+  private updateBlogStatus(): void {
+    const blogCard = this.element.querySelector('.section-card[data-section="blog"]');
+    if (!blogCard) return;
+    
+    const statusBadge = blogCard.querySelector('.status-badge');
+    if (!statusBadge) return;
+    
+    const player = this.gameState.getPlayer();
+    const memories = player.memories || [];
+    const unpublishedMemories = memories.filter(m => !m.isPublished);
+    const recentPosts = player.blogPosts?.filter((postId: string) => {
+      // Check if posted today (simplified - just check if any posts exist)
+      return true;
+    }) || [];
+    
+    // Determine blog status
+    if (unpublishedMemories.length > 0) {
+      statusBadge.className = 'status-badge status--blog status--ready';
+      statusBadge.textContent = `${unpublishedMemories.length} to Share`;
+    } else if (recentPosts.length > 0) {
+      statusBadge.className = 'status-badge status--blog status--posted';
+      statusBadge.textContent = 'Posted Today';
+    } else {
+      statusBadge.className = 'status-badge status--blog';
+      statusBadge.textContent = 'No Memories';
     }
   }
 }
