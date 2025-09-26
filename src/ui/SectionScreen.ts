@@ -51,7 +51,7 @@ export class SectionScreen extends UnifiedBaseScreen {
       <div class="section-profile-container">
         <!-- Hero Section -->
         <div class="section-hero npc-${this.sectionType}" id="helper-spotlight">
-          <img class="section-hero-portrait" id="helper-portrait" src="art/ui/placeholder_icon.svg" alt="${this.getHelperName()}" />
+          <img class="section-hero-portrait" id="helper-portrait" src="${getAssetPath('art/ui/placeholder_icon.svg')}" alt="${this.getHelperName()}" />
         </div>
 
         <!-- Header Section -->
@@ -593,7 +593,7 @@ export class SectionScreen extends UnifiedBaseScreen {
     const portraitEl = this.element.querySelector('#helper-portrait') as HTMLImageElement;
     if (portraitEl) {
       const portrait = helper.artRefs?.portrait || 'art/ui/placeholder_icon.svg';
-      portraitEl.src = portrait.startsWith('/') ? portrait.substring(1) : portrait;
+      portraitEl.src = getAssetPath(portrait);
     }
   }
 
