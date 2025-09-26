@@ -104,6 +104,10 @@ export class UnifiedCafeScreen extends UnifiedBaseScreen {
       this.updateSectionStatuses();
     });
     
+    this.eventSystem.on('shift:ready_to_collect', () => {
+      this.updateSectionStatuses();
+    });
+    
     // Section cards
     this.element.querySelectorAll('.section-card:not(.section-card--locked)').forEach(card => {
       card.addEventListener('click', () => {
@@ -239,19 +243,25 @@ export class UnifiedCafeScreen extends UnifiedBaseScreen {
       const statusBadge = sectionCard.querySelector('.status-badge');
       if (!statusBadge) return;
       
-      // Check if there's an active shift
+      // Check for active shift
       const activeShift = activeShifts.find(shift => shift.sectionType === section.sectionType);
       
       if (activeShift) {
-        const remainingTime = this.getRemainingTime(activeShift);
-        if (remainingTime <= 0) {
+        if (activeShift.status === 'complete') {
           // Shift is complete, rewards ready to collect
           statusBadge.className = 'status-badge status--complete';
           statusBadge.textContent = 'Collect Rewards!';
-        } else {
+        } else if (activeShift.status === 'running') {
           // Shift is in progress
-          statusBadge.className = 'status-badge status--busy';
-          statusBadge.textContent = this.formatTime(remainingTime);
+          const remainingTime = this.getRemainingTime(activeShift);
+          if (remainingTime <= 0) {
+            // Timer finished but status not yet updated
+            statusBadge.className = 'status-badge status--complete';
+            statusBadge.textContent = 'Collect Rewards!';
+          } else {
+            statusBadge.className = 'status-badge status--busy';
+            statusBadge.textContent = this.formatTime(remainingTime);
+          }
         }
       } else {
         // No active shift

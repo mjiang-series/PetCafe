@@ -117,8 +117,18 @@ export class SectionScreen extends UnifiedBaseScreen {
     this.checkActiveShift();
     this.updateHelperPortrait();
     
-    // Check for pending rewards
-    if (this.pendingRewards) {
+    // Check if shift is complete and ready to collect
+    const activeShifts = this.gameState.getActiveShifts();
+    const activeShift = activeShifts.find(s => s.sectionType === this.sectionType);
+    
+    if (activeShift?.status === 'complete') {
+      // Calculate and show rewards for the completed shift
+      const rewards = this.shiftManager.completeShift(activeShift.shiftId);
+      if (rewards) {
+        this.showRewards(rewards);
+      }
+    } else if (this.pendingRewards) {
+      // Check for pending rewards from previous screen
       this.showRewards(this.pendingRewards);
       this.pendingRewards = null;
     }
@@ -151,8 +161,9 @@ export class SectionScreen extends UnifiedBaseScreen {
 
     this.eventSystem.on('shift:completed', (data) => {
       if (data.shift.sectionType === this.sectionType) {
-        // Only show rewards if this screen is currently visible
-        if (this.isVisible) {
+        // Only show rewards if this screen is currently visible AND it was an instant finish
+        // Natural completions should wait for player to enter the section
+        if (this.isVisible && data.forced) {
           this.showRewards(data.rewards);
         } else {
           // Store the pending rewards to show when player enters this section

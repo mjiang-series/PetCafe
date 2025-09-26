@@ -125,8 +125,8 @@ export class ShiftManager {
       return null;
     }
 
-    if (shift.status !== 'running') {
-      console.error(`[ShiftManager] Shift ${shiftId} is not running`);
+    if (shift.status !== 'running' && shift.status !== 'complete') {
+      console.error(`[ShiftManager] Shift ${shiftId} is not running or ready to complete`);
       this.completingShifts.delete(shiftId);
       return null;
     }
@@ -230,7 +230,7 @@ export class ShiftManager {
     }
 
     // Emit completion event
-    this.eventSystem.emit(GameEvents.SHIFT_COMPLETED, { shift, rewards });
+    this.eventSystem.emit(GameEvents.SHIFT_COMPLETED, { shift, rewards, forced });
 
     console.log(`[ShiftManager] Completed shift ${shiftId}`, rewards);
     
@@ -245,7 +245,12 @@ export class ShiftManager {
     const shifts = this.gameState.getActiveShifts();
     const shift = shifts.find(s => s.shiftId === shiftId);
 
-    if (!shift || shift.status !== 'running' || !shift.startedAt) {
+    if (!shift || !shift.startedAt) {
+      return 0;
+    }
+    
+    // If shift is complete, return 0
+    if (shift.status === 'complete') {
       return 0;
     }
 
@@ -354,9 +359,16 @@ export class ShiftManager {
             progress: 1 - (remainingTime / shift.duration)
           });
 
-          // Auto-complete if time is up
-          if (remainingTime <= 0 && !this.timers.has(shift.shiftId)) {
-            this.completeShift(shift.shiftId);
+          // Mark shift as ready to collect when time is up
+          if (remainingTime <= 0 && shift.status === 'running') {
+            // Update shift status in the active shifts array
+            shift.status = 'complete';
+            
+            // Emit event to update UI
+            this.eventSystem.emit('shift:ready_to_collect', {
+              shiftId: shift.shiftId,
+              sectionType: shift.sectionType
+            });
           }
         }
       });
