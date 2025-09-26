@@ -8,6 +8,7 @@ export class PersistentHeader {
   private eventSystem: EventSystem;
   private gameState: GameStateManager;
   private currentVariant: string = 'default';
+  private parentScreen: string | null = null;
 
   constructor(eventSystem: EventSystem, gameState: GameStateManager) {
     this.eventSystem = eventSystem;
@@ -87,8 +88,21 @@ export class PersistentHeader {
     this.eventSystem.on('shift:status_changed', () => this.updateNotificationCount());
     
     // Listen for screen changes to update header variant
-    this.eventSystem.on('ui:screen_shown', (data: { screenId: string }) => {
+    this.eventSystem.on('ui:screen_shown', (data: { screenId: string, parentScreen?: string }) => {
+      // Track parent screen for nested navigation
+      if (data.parentScreen) {
+        this.parentScreen = data.parentScreen;
+      } else if (!this.isNestedScreen(data.screenId)) {
+        // Reset parent screen for top-level screens
+        this.parentScreen = null;
+      }
+      
       this.updateHeaderVariant(data.screenId);
+    });
+    
+    // Listen for explicit variant changes
+    this.eventSystem.on('header:set_variant', (data: { variant: string }) => {
+      this.setVariant(data.variant);
     });
   }
 
@@ -170,34 +184,61 @@ export class PersistentHeader {
     this.eventSystem.off('ui:notification_added', () => this.updateNotificationCount());
   }
   
+  public setVariant(variant: string): void {
+    // Allow manual setting of header variant
+    this.element.classList.remove(`header-variant-${this.currentVariant}`);
+    this.currentVariant = variant;
+    this.element.classList.add(`header-variant-${this.currentVariant}`);
+  }
+  
+  private isNestedScreen(screenId: string): boolean {
+    // Screens that are typically nested within other screens
+    const nestedScreens = ['pet-profile', 'dm', 'blog-post', 'section-aria', 'section-kai', 'section-elias'];
+    return nestedScreens.some(nested => screenId.includes(nested));
+  }
+  
   private updateHeaderVariant(screenId: string): void {
     // Remove previous variant class
     this.element.classList.remove(`header-variant-${this.currentVariant}`);
     
-    // Determine new variant based on screen
-    switch (screenId) {
-      case 'cafe-overview':
-      case 'section-aria':
-      case 'section-kai':
-      case 'section-elias':
-        this.currentVariant = 'cafe';
-        break;
-      case 'gacha':
-        this.currentVariant = 'gacha';
-        break;
-      case 'dm':
-      case 'dm-list':
-        this.currentVariant = 'messages';
-        break;
-      case 'pet-collection':
-        this.currentVariant = 'collection';
-        break;
-      case 'blog':
-        this.currentVariant = 'blog';
-        break;
-      default:
-        this.currentVariant = 'default';
+    // Determine new variant based on screen or parent context
+    let variant = 'default';
+    
+    // First check if we have a parent screen context for nested screens
+    if (this.parentScreen && this.isNestedScreen(screenId)) {
+      // Use parent screen's variant
+      if (this.parentScreen.includes('cafe')) {
+        variant = 'cafe';
+      } else if (this.parentScreen === 'gacha') {
+        variant = 'gacha';
+      } else if (this.parentScreen.includes('message') || this.parentScreen === 'dm-list') {
+        variant = 'messages';
+      } else if (this.parentScreen === 'pet-collection') {
+        variant = 'collection';
+      } else if (this.parentScreen === 'blog') {
+        variant = 'blog';
+      }
+    } else {
+      // Check for specific screens and their children
+      if (screenId.startsWith('cafe-') || screenId.startsWith('section-')) {
+        // Cafe overview and all section screens
+        variant = 'cafe';
+      } else if (screenId === 'gacha' || screenId.includes('gacha')) {
+        // Gacha and related screens
+        variant = 'gacha';
+      } else if (screenId.startsWith('dm') || screenId === 'messages' || screenId.includes('chat')) {
+        // Messages, DM list, individual DMs, and chat screens
+        variant = 'messages';
+      } else if (screenId === 'pet-collection' || screenId === 'pet-profile' || screenId.includes('pet')) {
+        // Pet collection and pet profiles
+        variant = 'collection';
+      } else if (screenId === 'blog' || screenId.includes('post') || screenId.includes('blog')) {
+        // Blog and individual posts
+        variant = 'blog';
+      }
     }
+    
+    this.currentVariant = variant;
     
     // Add new variant class
     this.element.classList.add(`header-variant-${this.currentVariant}`);
