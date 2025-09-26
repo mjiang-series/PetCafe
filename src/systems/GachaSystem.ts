@@ -231,13 +231,13 @@ export class GachaSystem {
     }
   }
 
-  // Get token value for duplicate pets
+  // Get coin value for duplicate pets
   private getTokensForDuplicate(rarity: PetRarity): number {
     switch (rarity) {
-      case '3-star': return 5;
-      case '4-star': return 20;
-      case '5-star': return 100;
-      default: return 5;
+      case '3-star': return 1000;
+      case '4-star': return 2500;
+      case '5-star': return 5000;
+      default: return 1000;
     }
   }
 
@@ -310,7 +310,10 @@ export class GachaSystem {
 
     this.gameStateManager.updatePlayer({
       pets: newPets,
-      dupeTokens: player.dupeTokens + totalTokens,
+      currencies: {
+        ...player.currencies,
+        coins: player.currencies.coins + totalTokens // Duplicates now give coins
+      },
       statistics: {
         ...player.statistics,
         pityCounter: this.pityCounter,

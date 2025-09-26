@@ -446,10 +446,10 @@ export class GachaScreen extends UnifiedBaseScreen {
         <div class="duplicate-summary">
           <div class="token-reward">
             <span class="material-icons icon-gold">paid</span>
-            <span class="token-amount">${totalTokens}</span>
-            <span class="token-label">Duplicate Tokens</span>
+            <span class="token-amount">${totalTokens.toLocaleString()}</span>
+            <span class="token-label">Coins</span>
           </div>
-          <p class="duplicate-count">${dupes.length} duplicate${dupes.length > 1 ? 's' : ''} converted to tokens</p>
+          <p class="duplicate-count">${dupes.length} duplicate${dupes.length > 1 ? 's' : ''} converted to coins</p>
         </div>
       </div>
     `;

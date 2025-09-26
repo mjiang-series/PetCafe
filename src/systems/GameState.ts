@@ -110,6 +110,21 @@ export class GameStateManager {
       changes: updates
     });
 
+    // Emit specific events for UI updates
+    if (updates.currencies) {
+      this.eventSystem.emit('player:currencies_updated', {
+        old: oldPlayer.currencies,
+        new: this.state.player.currencies
+      });
+    }
+    
+    if (updates.subscribers !== undefined) {
+      this.eventSystem.emit('blog:subscriber_gained', {
+        oldCount: oldPlayer.subscribers,
+        newCount: this.state.player.subscribers
+      });
+    }
+
     this.triggerSave();
   }
 
@@ -123,7 +138,7 @@ export class GameStateManager {
         npcId,
         bondLevel: 1,
         bondPoints: points,
-        maxBondPoints: 100,
+        maxBondPoints: 150, // Level 1 > 2 threshold
         milestones: []
       });
     } else {
@@ -136,7 +151,21 @@ export class GameStateManager {
       while (bond.bondPoints >= bond.maxBondPoints) {
         bond.bondPoints -= bond.maxBondPoints;
         bond.bondLevel++;
-        bond.maxBondPoints = bond.bondLevel * 100; // Simple scaling
+        
+        // Update max points based on new level thresholds
+        switch (bond.bondLevel) {
+          case 2:
+            bond.maxBondPoints = 500; // Level 2 > 3
+            break;
+          case 3:
+            bond.maxBondPoints = 1500; // Level 3 > 4
+            break;
+          case 4:
+            bond.maxBondPoints = 5000; // Level 4 > 5
+            break;
+          default:
+            bond.maxBondPoints = 10000; // Level 5+ (future expansion)
+        }
         
         this.eventSystem.emit('npc:bond_level_up', {
           npcId,

@@ -20,11 +20,13 @@ export interface Shift {
 
 export interface ShiftRewards {
   coins: number;
-  helperXP: number;
+  helperXP: number; // Deprecated - kept for compatibility
+  npcBondXP?: number; // NPC relationship XP
   memoryCandidateId?: string | undefined; // potential memory to be published
   bonusRewards?: {
     premiumCurrency?: number | undefined;
     dupeTokens?: number | undefined;
+    freeGachaCurrency?: number | undefined; // Gacha tickets
     specialItems?: Record<string, number> | undefined;
   } | undefined;
 }

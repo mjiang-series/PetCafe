@@ -60,8 +60,8 @@ export class ShiftRewardsModal {
         </div>
         
         <div class="rewards-body">
-          ${this.createRewardsSection(data.rewards)}
           ${this.createBondSection(data)}
+          ${this.createRewardsSection(data.rewards)}
           ${this.createMemorySection(data.rewards)}
         </div>
         
@@ -80,6 +80,13 @@ export class ShiftRewardsModal {
   private createRewardsSection(rewards: ShiftRewards): string {
     let html = '<div class="rewards-section">';
     html += '<h3>Rewards Earned</h3>';
+    
+    // Add staffing bonus message if coins are above base
+    if (rewards.coins > 1800) {
+      const bonusCoinAmount = rewards.coins - 1800;
+      html += `<p class="staffing-bonus">+${bonusCoinAmount} bonus coins</p>`;
+    }
+    
     html += '<div class="reward-items">';
     
     // Base rewards
@@ -94,15 +101,7 @@ export class ShiftRewardsModal {
     `;
     
     if (rewards.helperXP > 0) {
-      html += `
-        <div class="reward-item">
-          <span class="reward-icon material-icons">favorite</span>
-          <span class="reward-text">
-            <span class="reward-amount">${rewards.helperXP}</span>
-            <span class="reward-label">Helper XP</span>
-          </span>
-        </div>
-      `;
+      // Skip helper XP display - deprecated
     }
     
     // Bonus rewards
@@ -114,6 +113,18 @@ export class ShiftRewardsModal {
             <span class="reward-text">
               <span class="reward-amount">+${rewards.bonusRewards.premiumCurrency}</span>
               <span class="reward-label">Gems</span>
+            </span>
+          </div>
+        `;
+      }
+      
+      if (rewards.bonusRewards.freeGachaCurrency) {
+        html += `
+          <div class="reward-item bonus">
+            <span class="reward-icon material-icons">confirmation_number</span>
+            <span class="reward-text">
+              <span class="reward-amount">+${rewards.bonusRewards.freeGachaCurrency}</span>
+              <span class="reward-label">Gacha Ticket</span>
             </span>
           </div>
         `;
@@ -143,13 +154,13 @@ export class ShiftRewardsModal {
     if (!bond) return '';
     
     let html = '<div class="bond-progress-section">';
-    html += '<h3>Bond Progress</h3>';
+    html += '<h3>Relationship Progress</h3>';
     
     // Bond points earned
     html += `
       <div class="bond-points-earned">
         <span class="bond-icon material-icons icon-love">favorite</span>
-        <span class="bond-text">+${data.bondPointsEarned} Bond Points</span>
+        <span class="bond-text">+${data.bondPointsEarned} Relationship Points</span>
       </div>
     `;
     
@@ -172,7 +183,7 @@ export class ShiftRewardsModal {
       html += `
         <div class="bond-level-up">
           <span class="level-up-icon material-icons">celebration</span>
-          <span class="level-up-text">Bond Level ${data.newBondLevel}!</span>
+          <span class="level-up-text">Relationship Level ${data.newBondLevel}!</span>
         </div>
       `;
     }
@@ -196,37 +207,49 @@ export class ShiftRewardsModal {
   }
 
   private getNPCReaction(npcId: string, rewards: ShiftRewards): string {
-    const reactions: Record<string, { good: string; great: string; perfect: string }> = {
-      aria: {
-        good: "Great job! The pets loved helping in the bakery!",
-        great: "Wonderful work! The smell of fresh treats filled the air!",
-        perfect: "Amazing! This was one of our best shifts ever! 🍰"
-      },
-      kai: {
-        good: "Nice work! The pets had a blast!",
-        great: "Awesome job! Everyone's energy was through the roof!",
-        perfect: "INCREDIBLE! That was the most fun shift EVER! 🎉"
-      },
-      elias: {
-        good: "Well done... The pets look lovely.",
-        great: "Beautiful work... Their coats are shining.",
-        perfect: "Perfection... This was truly a work of art. ✨"
+    // Get the NPC data
+    const npc = getNPCById(npcId);
+    if (!npc) return "That was a good shift!";
+    
+    // Build context for the reaction
+    const hasMemory = !!rewards.memoryCandidateId;
+    const bonusCoins = rewards.coins - 1800;
+    const hasPetBonus = bonusCoins > 0;
+    
+    // Create contextual reactions based on NPC personality
+    if (npcId === 'aria') {
+      if (hasMemory) {
+        return "Oh my! Something special happened today - I can feel it! The cafe was filled with such warmth and joy! 🍰";
+      } else if (hasPetBonus && bonusCoins >= 500) {
+        return "The pets were absolutely wonderful today! They helped make everything run so smoothly!";
+      } else if (hasPetBonus) {
+        return "Thank you for the help! The pets really made a difference in the bakery today.";
+      } else {
+        return "Another lovely shift! Even without extra helpers, we managed to get everything done.";
       }
-    };
-    
-    const npcReactions = reactions[npcId] || reactions.aria;
-    
-    // Determine quality based on rewards amount
-    // Perfect: Generated memory or high coin rewards
-    if (rewards.memoryCandidateId || rewards.coins >= 100) {
-      return npcReactions.perfect;
-    } 
-    // Great: Good rewards
-    else if (rewards.coins >= 50) {
-      return npcReactions.great;
+    } else if (npcId === 'kai') {
+      if (hasMemory) {
+        return "WHOA! That was EPIC! Something super cool happened - I gotta remember this one! 🎉";
+      } else if (hasPetBonus && bonusCoins >= 500) {
+        return "DUDE! The pets were ON FIRE today! Best. Team. EVER!";
+      } else if (hasPetBonus) {
+        return "Nice! The pets brought some extra energy to the playground!";
+      } else {
+        return "That was fun! Next time bring some pets - they make everything more exciting!";
+      }
+    } else if (npcId === 'elias') {
+      if (hasMemory) {
+        return "How... remarkable. Today's session revealed something quite special. I must document this... ✨";
+      } else if (hasPetBonus && bonusCoins >= 500) {
+        return "Exquisite work... The pets demonstrated exceptional grace today.";
+      } else if (hasPetBonus) {
+        return "Adequate... The pets contributed nicely to today's aesthetic.";
+      } else {
+        return "The shift is complete. Consider bringing assistants next time for enhanced results.";
+      }
     }
-    // Good: Base rewards
-    return npcReactions.good;
+    
+    return "That was a good shift!";
   }
 
   private setupEventListeners(): void {

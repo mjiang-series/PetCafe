@@ -3,7 +3,7 @@ import { UnifiedBaseScreen } from './UnifiedBaseScreen';
 import { EventSystem } from '../systems/EventSystem';
 import { GameStateManager } from '../systems/GameState';
 import { ShiftManager } from '../systems/ShiftManager';
-import { SectionType, PlayerPet, Shift } from '../models';
+import { SectionType, PlayerPet, Shift, Pet } from '../models';
 import { getPetById } from '../utils/petData';
 import { getNPCById } from '../utils/npcData';
 import { getAssetPath } from '../utils/assetPaths';
@@ -78,7 +78,7 @@ export class SectionScreen extends UnifiedBaseScreen {
           </div>
 
           <div class="shift-controls">
-            <button class="btn btn--primary btn--large" id="start-shift-btn" disabled>
+            <button class="btn btn--primary btn--large" id="start-shift-btn">
               <span class="material-icons">play_arrow</span>
               Start Shift
             </button>
@@ -363,13 +363,12 @@ export class SectionScreen extends UnifiedBaseScreen {
   private updateStartButton(): void {
     const startBtn = this.element.querySelector('#start-shift-btn') as HTMLButtonElement;
     if (startBtn) {
-      startBtn.disabled = this.selectedPets.size === 0;
+      // Always enable the button - shifts can start with 0 pets
+      startBtn.disabled = false;
     }
   }
 
   private startShift(): void {
-    if (this.selectedPets.size === 0) return;
-
     const petIds = Array.from(this.selectedPets);
     const shiftId = this.shiftManager.startShift(this.sectionType, petIds);
 
@@ -406,7 +405,7 @@ export class SectionScreen extends UnifiedBaseScreen {
       const remainingTime = this.shiftManager.getRemainingTime(section.currentShift.shiftId);
       
       const circumference = 2 * Math.PI * 45; // radius = 45
-      const elapsedTime = section.currentShift.duration - remainingTime;
+      const elapsedTime = section.currentShift.duration - remainingTime; // Both in milliseconds
       const accruedRewards = this.calculateAccruedRewards(section.currentShift, elapsedTime);
       
       statusElement.innerHTML = `
@@ -430,10 +429,6 @@ export class SectionScreen extends UnifiedBaseScreen {
             <div class="accrued-reward">
               <span class="material-icons icon-sm">favorite</span>
               <span class="accrued-amount" id="accrued-xp">${accruedRewards.xp}</span>
-            </div>
-            <div class="accrued-reward">
-              <span class="material-icons icon-sm">photo_camera</span>
-              <span class="accrued-status" id="memory-status">${accruedRewards.memoryReady ? '✓' : '...'}</span>
             </div>
           </div>
         </div>
@@ -504,11 +499,9 @@ export class SectionScreen extends UnifiedBaseScreen {
       
       const coinsElement = this.element.querySelector('#accrued-coins');
       const xpElement = this.element.querySelector('#accrued-xp');
-      const memoryElement = this.element.querySelector('#memory-status');
       
       if (coinsElement) coinsElement.textContent = accruedRewards.coins.toString();
       if (xpElement) xpElement.textContent = accruedRewards.xp.toString();
-      if (memoryElement) memoryElement.textContent = accruedRewards.memoryReady ? '✓' : '...';
     }
   }
 
@@ -537,8 +530,8 @@ export class SectionScreen extends UnifiedBaseScreen {
     
     if (!section || !section.helper) return;
     
-    // Use the bond points from the event or fall back to helperXP
-    const bondPointsEarned = this.lastBondPointsEarned || rewards.helperXP || 0;
+    // Use npcBondXP from rewards (should be 180 base)
+    const bondPointsEarned = rewards.npcBondXP || rewards.helperXP || 0;
     
     // Check if there was a level up
     const bond = this.gameState.getPlayer().npcBonds.find(b => b.npcId === section.helper.npcId);
@@ -558,6 +551,8 @@ export class SectionScreen extends UnifiedBaseScreen {
     modal.show(rewardsData, () => {
       // Update shift status after modal closes
       this.updateShiftStatus();
+      // Force header update
+      this.eventSystem.emit('player:currencies_updated', {});
     });
   }
 
@@ -571,19 +566,60 @@ export class SectionScreen extends UnifiedBaseScreen {
     return names[this.sectionType] || this.sectionType;
   }
 
-  private calculateAccruedRewards(shift: Shift, elapsedTime: number): { coins: number, xp: number, memoryReady: boolean } {
-    const progress = elapsedTime / shift.duration;
-    const baseCoins = 30; // Base reward
-    const baseXp = 50;
+  private calculateAccruedRewards(shift: Shift, elapsedTime: number): { coins: number, xp: number } {
+    // Validate shift
+    if (!shift) {
+      console.warn('[SectionScreen] Invalid shift passed to calculateAccruedRewards');
+      return { coins: 0, xp: 0 };
+    }
     
-    // Calculate proportional rewards based on progress
-    const coins = Math.floor(baseCoins * progress);
-    const xp = Math.floor(baseXp * progress);
+    // Calculate multipliers based on pets
+    let efficiencyMultiplier = 1.0;
+    let starMultiplier = 1.0;
     
-    // Memory is ready after 50% progress
-    const memoryReady = progress >= 0.5;
+    // Use assignedPets property (not petIds)
+    const assignedPets = shift.assignedPets || [];
     
-    return { coins, xp, memoryReady };
+    if (assignedPets.length > 0) {
+      // Efficiency based on pet count
+      if (assignedPets.length === 1) {
+        efficiencyMultiplier = 1.05;
+      } else if (assignedPets.length === 2) {
+        efficiencyMultiplier = 1.1;
+      } else if (assignedPets.length >= 3) {
+        efficiencyMultiplier = 1.25;
+      }
+      
+      // Star bonuses
+      const pets = this.gameState.getPlayer().pets.filter(p => assignedPets.includes(p.petId));
+      pets.forEach(playerPet => {
+        const petData = this.getPetData(playerPet.petId);
+        if (petData) {
+          if (petData.rarity === '5-star') {
+            starMultiplier *= 1.25;
+          } else if (petData.rarity === '4-star') {
+            starMultiplier *= 1.1;
+          }
+        }
+      });
+    }
+    
+    const totalMultiplier = efficiencyMultiplier * starMultiplier;
+    
+    // New reward rates: 10 coins/sec (with multiplier), 1 bond XP/sec
+    const baseCoinsPerSecond = 10;
+    const xpPerSecond = 1;
+    
+    // Calculate based on elapsed time in seconds
+    const elapsedSeconds = elapsedTime / 1000; // Convert from ms to seconds
+    
+    // For display purposes, show at least 1 second's worth of rewards if any time has elapsed
+    const displaySeconds = elapsedSeconds > 0 ? Math.max(1, elapsedSeconds) : 0;
+    
+    const coins = Math.floor(baseCoinsPerSecond * totalMultiplier * displaySeconds);
+    const xp = Math.floor(xpPerSecond * displaySeconds);
+    
+    return { coins, xp };
   }
 
   private updateHelperPortrait(): void {
@@ -642,6 +678,10 @@ export class SectionScreen extends UnifiedBaseScreen {
   private getNpcName(npcId: string): string {
     const npc = getNPCById(npcId);
     return npc?.name || '';
+  }
+  
+  private getPetData(petId: string): Pet | null {
+    return getPetById(petId);
   }
 
   private updateBondLevel(): void {

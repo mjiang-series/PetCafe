@@ -51,10 +51,10 @@ export class ShiftManager {
       return null;
     }
 
-    // Validate pets
-    if (petIds.length === 0 || petIds.length > section.capacity.petSlots) {
+    // Validate pets - allow 0 pets but enforce max
+    if (petIds.length > section.capacity.petSlots) {
       this.eventSystem.emit('game:error', { 
-        message: `Invalid number of pets. Max: ${section.capacity.petSlots}` 
+        message: `Too many pets. Max: ${section.capacity.petSlots}` 
       });
       return null;
     }

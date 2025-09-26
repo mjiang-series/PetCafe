@@ -81,14 +81,16 @@
 }
 
 .speech-bubble {
-  background: white;
-  color: var(--text-primary);
+  background: #f8f9fa;
+  color: #333333;
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: 12px;
   position: relative;
   max-width: 250px;
   font-size: 14px;
   line-height: 1.4;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .speech-bubble::before {
@@ -101,7 +103,7 @@
   height: 0;
   border-style: solid;
   border-width: 8px 8px 8px 0;
-  border-color: transparent white transparent transparent;
+  border-color: transparent #f8f9fa transparent transparent;
 }
 
 /* Body Section */
@@ -129,6 +131,19 @@
   font-weight: 600;
   margin: 0 0 var(--spacing-md) 0;
   color: var(--text-primary);
+}
+
+/* Staffing Bonus */
+.staffing-bonus {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  color: #333;
+  padding: 8px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  text-align: center;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(255, 215, 0, 0.2);
 }
 
 /* Reward Items */
@@ -328,7 +343,7 @@
     top: -8px;
     transform: translateX(-50%);
     border-width: 0 8px 8px 8px;
-    border-color: transparent transparent white transparent;
+    border-color: transparent transparent #f8f9fa transparent;
   }
 
   .reward-items {

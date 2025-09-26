@@ -39,12 +39,7 @@ const PET_AFFINITY_MAP: Record<string, Partial<Record<SectionType, number>>> = {
   'iris': { 'salon': 1.5 }
 };
 
-// Base reward multipliers by section
-const SECTION_REWARD_MULTIPLIERS: Record<SectionType, number> = {
-  'bakery': 1.0,
-  'playground': 1.1,
-  'salon': 1.2
-};
+// Section multipliers removed - all sections give same base rewards
 
 export class RewardSystem {
   private eventSystem: EventSystem;
@@ -60,6 +55,7 @@ export class RewardSystem {
     const baseRewards: ShiftRewards = {
       coins: this.getBaseCoins(shift.sectionType),
       helperXP: this.getBaseXP(shift.sectionType),
+      npcBondXP: this.getBaseNPCBondXP(shift.sectionType),
       memoryCandidateId: undefined,
       bonusRewards: {}
     };
@@ -73,11 +69,19 @@ export class RewardSystem {
     // Apply all multipliers
     const totalMultiplier = petBonuses.efficiencyMultiplier * consumableBonuses.rewardMultiplier;
     
+    // Check if this is a 5th shift for gacha ticket bonus
+    const shiftCount = this.gameState.getPlayer().statistics?.totalShiftsCompleted || 0;
+    const bonusRewards = this.calculateBonusRewards(shift, totalMultiplier);
+    if ((shiftCount + 1) % 5 === 0) {
+      bonusRewards.freeGachaCurrency = (bonusRewards.freeGachaCurrency || 0) + 1;
+    }
+    
     const finalRewards: ShiftRewards = {
-      coins: Math.floor(baseRewards.coins * totalMultiplier),
+      coins: Math.floor(baseRewards.coins * totalMultiplier) + petBonuses.affinityBonus,
       helperXP: Math.floor(baseRewards.helperXP * totalMultiplier),
+      npcBondXP: baseRewards.npcBondXP, // Pet bonuses don't apply to relationship XP
       memoryCandidateId: this.shouldGenerateMemory(shift) ? this.generateMemoryId() : undefined,
-      bonusRewards: this.calculateBonusRewards(shift, totalMultiplier)
+      bonusRewards
     };
 
     return {
@@ -89,41 +93,68 @@ export class RewardSystem {
   }
 
   private getBaseCoins(sectionType: SectionType): number {
-    const baseAmount = 20; // Base coins per shift
-    const multiplier = SECTION_REWARD_MULTIPLIERS[sectionType] || 1.0;
-    return Math.floor(baseAmount * multiplier);
+    // 10 coins per second * 180 seconds = 1800 base coins
+    const baseAmount = 1800;
+    return baseAmount;
   }
 
   private getBaseXP(sectionType: SectionType): number {
-    const baseAmount = 10; // Base XP per shift
-    const multiplier = SECTION_REWARD_MULTIPLIERS[sectionType] || 1.0;
-    return Math.floor(baseAmount * multiplier);
+    // Helper XP no longer used
+    return 0;
+  }
+
+  private getBaseNPCBondXP(sectionType: SectionType): number {
+    // 1 bond XP per second * 180 seconds = 180 base bond XP
+    const baseAmount = 180;
+    return baseAmount;
   }
 
   private calculatePetBonuses(sectionType: SectionType, pets: Pet[]): { efficiencyMultiplier: number; affinityBonus: number } {
-    if (pets.length === 0) {
-      return { efficiencyMultiplier: 0.5, affinityBonus: 0 }; // Penalty for no pets
+    // Base efficiency multiplier based on pet count
+    let baseMultiplier = 1.0;
+    if (pets.length === 1) {
+      baseMultiplier = 1.05; // 5% bonus for 1 pet
+    } else if (pets.length === 2) {
+      baseMultiplier = 1.1; // 10% bonus for 2 pets
+    } else if (pets.length >= 3) {
+      baseMultiplier = 1.25; // 25% bonus for 3 pets
     }
 
-    let totalAffinity = 0;
-    let petCount = 0;
-
+    // Star bonuses - multiplicative with base
+    let starMultiplier = 1.0;
     pets.forEach(pet => {
-      const affinityMap = PET_AFFINITY_MAP[pet.petId] || {};
-      const affinity = affinityMap[sectionType] || 1.0;
-      totalAffinity += affinity;
-      petCount++;
+      if (pet.rarity === '5-star') {
+        starMultiplier *= 1.25; // 25% per 5-star
+      } else if (pet.rarity === '4-star') {
+        starMultiplier *= 1.1; // 10% per 4-star
+      }
     });
 
-    // Average affinity across all assigned pets
-    const averageAffinity = totalAffinity / petCount;
-    
-    // Bonus for having multiple pets (teamwork bonus)
-    const teamworkBonus = 1 + (petCount - 1) * 0.1; // +10% per additional pet
+    // Affinity bonus - flat coin bonus based on matching pets in correct section
+    let affinityBonus = 0;
+    if (pets.length > 0) {
+      let matchingPets = 0;
+      pets.forEach(pet => {
+        const affinityMap = PET_AFFINITY_MAP[pet.petId] || {};
+        const affinity = affinityMap[sectionType] || 1.0;
+        if (affinity > 1.0) matchingPets++;
+      });
+      
+      // Flat coin bonuses based on matching pets
+      if (matchingPets === 0) {
+        affinityBonus = 0;
+      } else if (matchingPets === 1) {
+        affinityBonus = 100;
+      } else if (matchingPets === 2) {
+        affinityBonus = 250;
+      } else if (matchingPets >= 3) {
+        affinityBonus = 500;
+      }
+    }
     
     return {
-      efficiencyMultiplier: averageAffinity * teamworkBonus,
-      affinityBonus: averageAffinity - 1.0
+      efficiencyMultiplier: baseMultiplier * starMultiplier,
+      affinityBonus: affinityBonus
     };
   }
 
@@ -176,33 +207,37 @@ export class RewardSystem {
   }
 
   applyRewards(rewards: ShiftRewards, shift?: Shift): void {
-    const state = this.gameState.getState();
+    const player = this.gameState.getPlayer();
     
-    // Apply coin rewards
-    state.player.currencies.coins += rewards.coins;
+    // Prepare currency updates
+    const currencyUpdates = {
+      coins: player.currencies.coins + rewards.coins,
+      premiumCurrency: player.currencies.premiumCurrency,
+      freeGachaCurrency: player.currencies.freeGachaCurrency
+    };
     
     // Apply bonus rewards
     if (rewards.bonusRewards) {
       if (rewards.bonusRewards.premiumCurrency) {
-        state.player.currencies.premiumCurrency += rewards.bonusRewards.premiumCurrency;
+        currencyUpdates.premiumCurrency += rewards.bonusRewards.premiumCurrency;
       }
-      if (rewards.bonusRewards.dupeTokens) {
-        state.player.dupeTokens += rewards.bonusRewards.dupeTokens;
-      }
-      if (rewards.bonusRewards.specialItems) {
-        // Add items to inventory
-        Object.entries(rewards.bonusRewards.specialItems).forEach(([itemId, quantity]) => {
-          state.player.consumables[itemId] = (state.player.consumables[itemId] || 0) + quantity;
-        });
+      if (rewards.bonusRewards.freeGachaCurrency) {
+        currencyUpdates.freeGachaCurrency += rewards.bonusRewards.freeGachaCurrency;
       }
     }
     
-    // Apply helper XP as bond points to the NPC
-    if (shift && rewards.helperXP > 0) {
-      this.gameState.addBondPoints(shift.helperNpcId, rewards.helperXP);
+    // Update player with new currencies
+    this.gameState.updatePlayer({
+      currencies: currencyUpdates
+    });
+    
+    // Apply NPC bond XP (relationship points)
+    const bondXP = rewards.npcBondXP || rewards.helperXP || 0; // Fallback to helperXP for compatibility
+    if (shift && bondXP > 0) {
+      this.gameState.addBondPoints(shift.helperNpcId, bondXP);
       this.eventSystem.emit('npc:bond_increased', { 
         npcId: shift.helperNpcId, 
-        points: rewards.helperXP, 
+        points: bondXP, 
         reason: 'shift_completion' 
       });
     }
@@ -216,7 +251,13 @@ export class RewardSystem {
     }
     
     // Update statistics
-    state.player.statistics.totalShiftsCompleted++;
+    this.gameState.updatePlayer({
+      statistics: {
+        ...player.statistics,
+        totalShiftsCompleted: player.statistics.totalShiftsCompleted + 1,
+        totalCoinsEarned: player.statistics.totalCoinsEarned + rewards.coins
+      }
+    });
     
     // Emit reward event
     this.eventSystem.emit('rewards:applied', { rewards });
