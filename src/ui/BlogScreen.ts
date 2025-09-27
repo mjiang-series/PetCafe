@@ -7,6 +7,7 @@ import { ScreenHeaderConfig } from './components/ScreenHeader';
 import { getNPCById } from '../utils/npcData';
 import { Memory } from '../models/Memory';
 import { GachaSystem } from '../systems/GachaSystem';
+import { getAssetPath } from '../utils/AssetPaths';
 
 export class BlogScreen extends UnifiedBaseScreen {
   private blogPublisher: BlogPublisher;
@@ -27,56 +28,96 @@ export class BlogScreen extends UnifiedBaseScreen {
   protected getScreenHeaderConfig(): ScreenHeaderConfig | null {
     return {
       title: 'Cafe Moments',
-      showBack: true,
-      parentScreen: 'cafe-overview'
+      showBackButton: true,
+      backTarget: 'cafe-overview'
     };
   }
 
+  protected showBottomNav(): boolean {
+    return false; // Sub-screen, hide bottom nav like other cafe sections
+  }
+
   protected createContent(): string {
+    const player = this.gameState.getPlayer();
+    const unpublishedMemories = this.getUnpublishedMemories();
+    
     return `
-      <div class="blog-container">
-        <div class="blog-header-section">
-          <h2 class="blog-title">Cafe Moments</h2>
-          <button class="btn btn--primary" data-action="new-post">
-            <span class="icon-emoji">➕</span> Share a Moment
+      <div class="section-profile-container">
+        <!-- Hero Section -->
+        <div class="section-hero cafe-moments">
+          <img class="section-hero-portrait" src="${getAssetPath('art/ui/blog_placeholder.png')}" alt="Cafe Moments" />
+        </div>
+
+        <!-- Header Section -->
+        <div class="section-header">
+          <h1 class="section-name">Cafe Moments</h1>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="section-content-block">
+          <h2 class="section-title">
+            <span class="material-icons">analytics</span>
+            Your Impact
+          </h2>
+          <div class="blog-stats">
+            <div class="stat-item">
+              <span class="stat-value" id="total-posts">0</span>
+              <span class="stat-label">Moments Shared</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value" id="total-likes">0</span>
+              <span class="stat-label">Total Likes</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value" id="total-views">0</span>
+              <span class="stat-label">Total Views</span>
+            </div>
+          </div>
+          <div class="trending-mood" id="trending-mood">
+            <span class="trending-label">Trending Mood:</span>
+            <span class="mood-tag" id="trending-mood-tag">cozy</span>
+          </div>
+        </div>
+
+        <!-- Ready to Share Section -->
+        ${unpublishedMemories.length > 0 ? `
+          <div class="section-content-block">
+            <h2 class="section-title">
+              <span class="material-icons">photo_library</span>
+              Ready to Share
+            </h2>
+            <div class="memory-grid">
+              ${unpublishedMemories.map(memory => this.createMemoryPreviewCard(memory)).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <!-- Published Moments Section -->
+        <div class="section-content-block">
+          <h2 class="section-title">
+            <span class="material-icons">public</span>
+            Published Moments
+          </h2>
+          <div class="blog-feed" id="blog-feed">
+            <!-- Blog posts will be rendered here -->
+          </div>
+          
+          <div class="empty-blog" id="empty-blog" style="display: none;">
+            <div class="empty-state">
+              <span class="material-icons empty-icon">article</span>
+              <h3>No moments shared yet!</h3>
+              <p>You'll generate memories by completing shifts. Head back to the cafe and pick an area to start!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="section-actions">
+          <button class="btn btn--secondary" data-action="view-journal">
+            <span class="material-icons">menu_book</span>
+            View Journal
           </button>
         </div>
- 
-        <section class="blog-relationship" id="blog-relationship">
-          <!-- Relationship banner renders here -->
-        </section>
-
-        <div class="blog-stats">
-        <div class="stat-item">
-          <span class="stat-value" id="total-posts">0</span>
-          <span class="stat-label">Moments</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-value" id="total-likes">0</span>
-          <span class="stat-label">Likes</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-value" id="total-views">0</span>
-          <span class="stat-label">Views</span>
-        </div>
-      </div>
-
-      <div class="trending-mood" id="trending-mood">
-        <span class="trending-label">Trending:</span>
-        <span class="mood-tag" id="trending-mood-tag">cozy</span>
-      </div>
-
-      <div class="blog-feed" id="blog-feed">
-        <!-- Blog posts will be rendered here -->
-      </div>
-
-      <div class="empty-blog" id="empty-blog" style="display: none;">
-        <span class="empty-icon">📝</span>
-        <h3>No posts yet!</h3>
-        <p>Share your café memories with the world</p>
-        <button class="btn btn--primary" data-action="new-post">
-          Create Your First Post
-        </button>
       </div>
     `;
   }
@@ -95,10 +136,23 @@ export class BlogScreen extends UnifiedBaseScreen {
     super.setupEventListeners();
 
     this.addClickHandler('[data-action="new-post"]', () => {
-    // Show memory selection for sharing
-    this.eventSystem.emit('ui:show_screen', { 
-      screenId: 'memory-selection'
+      // Show memory selection for sharing
+      this.eventSystem.emit('ui:show_screen', { 
+        screenId: 'memory-selection'
+      });
     });
+
+    this.addClickHandler('[data-action="view-journal"]', () => {
+      this.eventSystem.emit('ui:show_screen', { screenId: 'journal' });
+    });
+
+    // Memory card clicks
+    this.addClickHandler('.memory-preview-card', (e) => {
+      const card = (e.target as HTMLElement).closest('.memory-preview-card');
+      const memoryId = card?.getAttribute('data-memory-id');
+      if (memoryId) {
+        this.shareMemory(memoryId);
+      }
     });
 
     // Listen for new posts
@@ -246,7 +300,16 @@ export class BlogScreen extends UnifiedBaseScreen {
 
   private renderBlogPost(post: BlogPost): string {
     const state = this.gameState.getState();
-    const memory = state.player.memories?.find(m => m.memoryId === post.memoryId);
+    const memory = state.player.memories?.find(m => 
+      m.id === post.memoryId || m.memoryId === post.memoryId
+    );
+    
+    // Get memory image URL
+    const imageUrl = memory?.imageUrl || post.content.imageUrl || 'art/memories_image_placeholder.png';
+    
+    // Get tagged NPCs and pets for auto-generated tags
+    const taggedNpcs = post.taggedNpcs || [];
+    const taggedPets = post.content.petIds || [];
     
     return `
       <article class="blog-post ${post.viral ? 'blog-post--viral' : ''}">
@@ -261,10 +324,8 @@ export class BlogScreen extends UnifiedBaseScreen {
         </div>
         
         <div class="post-image">
-          <div class="post-image-placeholder">
-            <span class="image-icon">📸</span>
-            <div class="image-location">${post.content.location}</div>
-          </div>
+          <img src="${getAssetPath(imageUrl)}" alt="Memory" />
+          <div class="post-mood-badge mood--${post.content.mood}">${post.content.mood}</div>
         </div>
         
         <div class="post-actions">
@@ -281,17 +342,23 @@ export class BlogScreen extends UnifiedBaseScreen {
         </div>
         
         <div class="post-content">
-          <p class="post-caption">${post.caption || post.content}</p>
-          ${post.petIds && post.petIds.length ? `<div class="post-pets">Featuring: ${post.petIds.map(id => `<span class="post-pet">${this.getPetName(id)}</span>`).join(', ')}</div>` : ''}
-          <div class="post-meta">
-            <span class="meta-item">
-              <span class="material-icons icon-sm">favorite</span> ${post.likes}
-            </span>
-            <span class="meta-item">
-              <span class="material-icons icon-sm">visibility</span> ${post.views}
-            </span>
-            ${this.renderBondGain(post)}
+          <p class="post-caption">${post.content.caption}</p>
+          
+          <!-- Auto-generated tags -->
+          <div class="post-tags">
+            ${taggedNpcs.map(npcId => {
+              const npc = getNPCById(npcId);
+              return `<span class="post-tag npc-tag">#${npc?.name || npcId}</span>`;
+            }).join('')}
+            ${taggedPets.map(petId => {
+              const pet = this.getPetData(petId);
+              return `<span class="post-tag pet-tag">#${pet?.name || petId}</span>`;
+            }).join('')}
+            <span class="post-tag location-tag">#${post.content.location}</span>
           </div>
+          
+          <!-- NPC Comments -->
+          ${this.renderNPCComments(post)}
         </div>
       </article>
     `;
@@ -365,5 +432,98 @@ export class BlogScreen extends UnifiedBaseScreen {
     if (hours > 0) return `${hours}h ago`;
     if (minutes > 0) return `${minutes}m ago`;
     return 'Just now';
+  }
+
+  private getUnpublishedMemories(): Memory[] {
+    const player = this.gameState.getPlayer();
+    const memories = player.memories || [];
+    return memories.filter(m => !m.isPublished);
+  }
+
+  private createMemoryPreviewCard(memory: Memory): string {
+    const date = new Date(memory.timestamp);
+    const timeStr = date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit' 
+    });
+    
+    // Get NPC info
+    const npcs = memory.taggedNPCs || memory.taggedNpcs || [];
+    const npcName = npcs.length > 0 ? getNPCById(npcs[0])?.name || '' : '';
+    
+    return `
+      <div class="memory-preview-card" data-memory-id="${memory.id || memory.memoryId}">
+        <div class="memory-preview-image">
+          <img src="${getAssetPath(memory.imageUrl || 'art/memories_image_placeholder.png')}" alt="Memory" />
+          <span class="memory-mood-badge mood--${memory.mood}">${memory.mood}</span>
+        </div>
+        <div class="memory-preview-content">
+          <div class="memory-meta">
+            ${npcName ? `<span class="memory-npc">${npcName}</span>` : ''}
+            <span class="memory-timestamp">${timeStr}</span>
+          </div>
+          <p class="memory-snippet">${memory.content.substring(0, 60)}...</p>
+          <button class="btn btn--primary btn--small">
+            <span class="material-icons">share</span>
+            Share
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  private shareMemory(memoryId: string): void {
+    // Show quick share modal
+    this.eventSystem.emit('ui:show_screen', {
+      screenId: 'quick-share',
+      data: { memoryId }
+    });
+  }
+
+  private getPetData(petId: string): any {
+    // Try to get pet data from gacha system
+    const petData = this.gachaSystem.getPetData?.()?.getPetById?.(petId);
+    if (petData) return petData;
+    
+    // Fallback to basic data
+    return { name: petId };
+  }
+
+  private renderNPCComments(post: BlogPost): string {
+    const reactions = post.reactions || [];
+    if (reactions.length === 0) return '';
+    
+    return `
+      <div class="post-comments">
+        ${reactions.map(reaction => {
+          const npc = getNPCById(reaction.npcId);
+          const npcName = npc?.name || reaction.npcId;
+          const portrait = npc?.artRefs?.portrait || 'art/ui/placeholder_icon.svg';
+          
+          return `
+            <div class="npc-comment">
+              <img src="${getAssetPath(portrait)}" alt="${npcName}" class="comment-avatar" />
+              <div class="comment-content">
+                <span class="comment-author">${npcName}</span>
+                <span class="comment-text">${this.getReactionText(reaction)}</span>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  private getReactionText(reaction: any): string {
+    // Generate contextual comment based on reaction type
+    const templates = {
+      love: ['❤️ Love this!', '😍 So adorable!', '💕 My heart!'],
+      laugh: ['😂 This made my day!', '🤣 Too funny!', '😄 Can\'t stop laughing!'],
+      surprised: ['😮 Wow!', '😲 Didn\'t expect that!', '🤯 Amazing!'],
+      like: ['👍 Nice!', '✨ Great moment!', '🌟 Love it!']
+    };
+    
+    const options = templates[reaction.reactionType] || templates.like;
+    return options[Math.floor(Math.random() * options.length)];
   }
 }

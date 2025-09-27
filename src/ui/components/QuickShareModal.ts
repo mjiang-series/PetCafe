@@ -263,10 +263,14 @@ export class QuickShareModal {
     }
 
     try {
+      // Get NPCs from the memory
+      const taggedNpcs = this.memory.taggedNPCs || this.memory.taggedNpcs || [];
+      
       // Publish the memory
       const post = await this.blogPublisher.publishMemory(
         this.memory.id || this.memory.memoryId,
-        this.selectedCaption
+        this.selectedCaption,
+        taggedNpcs
       );
 
       if (post) {

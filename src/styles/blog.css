@@ -628,3 +628,162 @@
   50% { transform: scale(1.05); }
   100% { transform: scale(1); }
 }
+
+/* Memory Grid for Ready to Share section in Blog/Cafe Moments */
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+/* Empty state styling */
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-xl) var(--spacing-md);
+  color: var(--text-secondary);
+}
+
+.empty-state .empty-icon {
+  font-size: 48px;
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-md);
+  display: block;
+}
+
+/* Memory preview card in blog screen */
+.section-profile-container .memory-preview-card {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.section-profile-container .memory-preview-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.memory-preview-content .memory-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xs);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.memory-npc {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.btn--small {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: 14px;
+}
+
+/* Blog post image styles */
+.post-image {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+}
+
+.post-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.post-mood-badge {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  background: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.post-mood-badge.mood--happy { color: #ff9800; }
+.post-mood-badge.mood--excited { color: #e91e63; }
+.post-mood-badge.mood--peaceful { color: #4caf50; }
+.post-mood-badge.mood--thoughtful { color: #2196f3; }
+.post-mood-badge.mood--nostalgic { color: #9c27b0; }
+.post-mood-badge.mood--energetic { color: #ff5722; }
+.post-mood-badge.mood--sleepy { color: #607d8b; }
+
+/* Post tags */
+.post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin: var(--spacing-md) 0;
+}
+
+.post-tag {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  background: #f0f0f0;
+  color: #666;
+}
+
+.post-tag.npc-tag {
+  background: rgba(233, 30, 99, 0.1);
+  color: #e91e63;
+}
+
+.post-tag.pet-tag {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+}
+
+.post-tag.location-tag {
+  background: rgba(33, 150, 243, 0.1);
+  color: #2196f3;
+}
+
+/* NPC Comments */
+.post-comments {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid #e0e0e0;
+}
+
+.npc-comment {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.comment-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.comment-content {
+  flex: 1;
+  background: #f8f9fa;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: 12px;
+}
+
+.comment-author {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-primary);
+  margin-right: var(--spacing-xs);
+}
+
+.comment-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+}

@@ -1,7 +1,7 @@
 /* Pet Profile Screen Styles */
 .pet-profile-screen {
   min-height: 100vh;
-  background: var(--bg-primary);
+  background: transparent;
   padding-bottom: calc(var(--spacing-xl) + var(--safe-area-inset-bottom));
   /* No top padding needed since floating header doesn't take space */
 }
@@ -19,6 +19,7 @@
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #FFF5E6 0%, #FFE0F0 100%);
+  border-radius: 0 0 20px 20px;
 }
 
 .profile-image {
@@ -76,7 +77,10 @@
   background: white;
   padding: var(--spacing-lg);
   text-align: center;
-  border-bottom: 1px solid #E0E0E0;
+  border: 1px solid #E0E0E0;
+  border-radius: 12px;
+  margin: var(--spacing-md);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .pet-name {
@@ -237,6 +241,10 @@
 .profile-story {
   background: white;
   padding: var(--spacing-lg);
+  border: 1px solid #E0E0E0;
+  border-radius: 12px;
+  margin: var(--spacing-md);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .story-section {
@@ -268,7 +276,11 @@
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: var(--spacing-md);
   padding: var(--spacing-lg);
-  background: #F5F5F5;
+  background: white;
+  border: 1px solid #E0E0E0;
+  border-radius: 12px;
+  margin: var(--spacing-md);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .detail-card {
@@ -305,10 +317,13 @@
 .profile-actions {
   padding: var(--spacing-lg);
   background: white;
-  border-top: 1px solid #E0E0E0;
+  border: 1px solid #E0E0E0;
   display: flex;
   gap: var(--spacing-md);
   flex-wrap: wrap;
+  border-radius: 12px;
+  margin: var(--spacing-md);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 /* Gacha Reveal */

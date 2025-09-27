@@ -87,10 +87,12 @@ export class BlogPublisher {
     }
     
     // NPC bonus
-    subscribersGained += post.taggedNpcs.length * 3; // +3 per tagged NPC
+    const taggedNpcs = post.taggedNpcs || [];
+    subscribersGained += taggedNpcs.length * 3; // +3 per tagged NPC
     
     // Pet rarity bonus
-    const pets = state.player.pets.filter(p => post.content.petIds.includes(p.petId));
+    const petIds = post.content.petIds || [];
+    const pets = state.player.pets.filter(p => petIds.includes(p.petId));
     const hasRare = pets.some(p => p.rarity === 'Rare');
     const hasUltraRare = pets.some(p => p.rarity === 'UltraRare');
     
@@ -126,7 +128,8 @@ export class BlogPublisher {
   private generateNPCReactions(post: BlogPost): void {
     const state = this.gameState.getState();
     
-    post.taggedNpcs.forEach(npcId => {
+    const taggedNpcs = post.taggedNpcs || [];
+    taggedNpcs.forEach(npcId => {
       const npcBond = state.player.npcBonds.find(b => b.npcId === npcId);
       if (!npcBond) return;
       

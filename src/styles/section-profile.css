@@ -3,7 +3,7 @@
   max-width: 600px;
   margin: 0 auto;
   padding: 0;
-  background: var(--bg-primary);
+  background: transparent;
   min-height: 100vh;
   padding-bottom: calc(var(--spacing-xl) + var(--safe-area-inset-bottom));
 }
@@ -15,6 +15,7 @@
   position: relative;
   overflow: hidden;
   background: linear-gradient(135deg, #FFF5E6 0%, #FFE0F0 100%);
+  border-radius: 0 0 20px 20px;
 }
 
 .section-hero.npc-aria {
@@ -60,6 +61,8 @@
   text-align: center;
   border-bottom: 1px solid #E0E0E0;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  border-radius: 12px;
+  margin: var(--spacing-md) var(--spacing-md) 0;
 }
 
 .section-name {
@@ -111,10 +114,11 @@
 /* Content Blocks */
 .section-content-block {
   background: white;
-  margin-top: var(--spacing-md);
+  margin: var(--spacing-md);
   padding: var(--spacing-lg);
-  border-top: 1px solid #E0E0E0;
-  border-bottom: 1px solid #E0E0E0;
+  border: 1px solid #E0E0E0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .section-title {
@@ -279,11 +283,13 @@
 .section-actions {
   padding: var(--spacing-lg);
   background: white;
-  border-top: 1px solid #E0E0E0;
+  border: 1px solid #E0E0E0;
   display: flex;
   gap: var(--spacing-md);
   flex-wrap: wrap;
-  margin-top: var(--spacing-md);
+  margin: var(--spacing-md);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .section-actions .btn {
