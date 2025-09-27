@@ -36,33 +36,21 @@ export class GachaScreen extends UnifiedBaseScreen {
           </div>
         </div>
         
-        <!-- Currency Display -->
-        <div class="gacha-currency">
-          <div class="currency-item">
-            <span class="material-icons icon-sm icon-gold">paid</span>
-            <span class="currency-amount" id="coins-display">0</span>
-          </div>
-          <div class="currency-item">
-            <span class="material-icons icon-sm icon-gem">diamond</span>
-            <span class="currency-amount" id="gems-display">0</span>
-          </div>
-        </div>
         
         <!-- Pull Buttons -->
         <div class="gacha-actions">
           <button class="btn btn--primary btn--large gacha-pull-btn" data-action="pull-single">
             <span class="pull-cost">
-              <span class="material-icons icon-sm icon-gold">paid</span> 100
+              <span class="material-icons icon-sm">confirmation_number</span> 1 Ticket
             </span>
             <span class="pull-label">Single Pull</span>
           </button>
           
           <button class="btn btn--primary btn--large gacha-pull-btn" data-action="pull-ten">
             <span class="pull-cost">
-              <span class="material-icons icon-sm icon-gold">paid</span> 900
+              <span class="material-icons icon-sm">confirmation_number</span> 10 Tickets
             </span>
             <span class="pull-label">10x Pull</span>
-            <span class="pull-bonus">Save 100!</span>
           </button>
         </div>
         
@@ -187,10 +175,10 @@ export class GachaScreen extends UnifiedBaseScreen {
     const tenBtn = this.element.querySelector('[data-action="pull-ten"]') as HTMLButtonElement;
     
     if (singleBtn) {
-      singleBtn.disabled = this.isPulling || player.currencies.coins < 100;
+      singleBtn.disabled = this.isPulling || player.currencies.freeGachaCurrency < 1;
     }
     if (tenBtn) {
-      tenBtn.disabled = this.isPulling || player.currencies.coins < 900;
+      tenBtn.disabled = this.isPulling || player.currencies.freeGachaCurrency < 10;
     }
   }
 

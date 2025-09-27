@@ -8,7 +8,7 @@ import petsData from '../data/pets.json';
 export interface GachaPull {
   pullId: string;
   timestamp: number;
-  cost: { currency: 'coins' | 'gems', amount: number };
+  cost: { currency: 'coins' | 'gems' | 'freeGachaCurrency', amount: number };
   results: PetPullResult[];
   bonusTokens?: number;
 }
@@ -50,7 +50,7 @@ export class GachaSystem {
 
   // Perform a single pull
   async pullSingle(): Promise<GachaPull | null> {
-    const cost = { currency: 'coins' as const, amount: 100 };
+    const cost = { currency: 'freeGachaCurrency' as const, amount: 1 };
     
     if (!this.canAffordPull(cost)) {
       this.eventSystem.emit('gacha:insufficient_funds', { required: cost.amount });
@@ -80,9 +80,9 @@ export class GachaSystem {
     return pull;
   }
 
-  // Perform a 10x pull with discount
+  // Perform a 10x pull
   async pullTenTimes(): Promise<GachaPull | null> {
-    const cost = { currency: 'coins' as const, amount: 900 }; // 10% discount
+    const cost = { currency: 'freeGachaCurrency' as const, amount: 10 };
     
     if (!this.canAffordPull(cost)) {
       this.eventSystem.emit('gacha:insufficient_funds', { required: cost.amount });
@@ -242,20 +242,22 @@ export class GachaSystem {
   }
 
   // Check if player can afford pull
-  private canAffordPull(cost: { currency: 'coins' | 'gems', amount: number }): boolean {
+  private canAffordPull(cost: { currency: 'coins' | 'gems' | 'freeGachaCurrency', amount: number }): boolean {
     const player = this.gameStateManager.getPlayer();
     
     if (cost.currency === 'coins') {
       return player.currencies.coins >= cost.amount;
     } else if (cost.currency === 'gems') {
       return player.currencies.premiumCurrency >= cost.amount;
+    } else if (cost.currency === 'freeGachaCurrency') {
+      return player.currencies.freeGachaCurrency >= cost.amount;
     }
     
     return false;
   }
 
   // Deduct currency from player
-  private deductCurrency(cost: { currency: 'coins' | 'gems', amount: number }): void {
+  private deductCurrency(cost: { currency: 'coins' | 'gems' | 'freeGachaCurrency', amount: number }): void {
     const player = this.gameStateManager.getPlayer();
     
     if (cost.currency === 'coins') {
@@ -270,6 +272,13 @@ export class GachaSystem {
         currencies: {
           ...player.currencies,
           premiumCurrency: player.currencies.premiumCurrency - cost.amount
+        }
+      });
+    } else if (cost.currency === 'freeGachaCurrency') {
+      this.gameStateManager.updatePlayer({
+        currencies: {
+          ...player.currencies,
+          freeGachaCurrency: player.currencies.freeGachaCurrency - cost.amount
         }
       });
     }

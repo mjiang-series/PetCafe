@@ -452,9 +452,9 @@ export class GameStateManager {
         totalPlayTime: 0
       },
       currencies: {
-        coins: 1000, // Enough for 10x pull to start
+        coins: 1000,
         premiumCurrency: 50,
-        freeGachaCurrency: 1
+        freeGachaCurrency: 10 // Start with 10 gacha tickets
       },
       pets: [],
       npcBonds: [
