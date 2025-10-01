@@ -430,13 +430,17 @@ export class ShiftRewardsModal {
     const oldVisitors = player.subscribers || 0;
     const newVisitors = oldVisitors + visitorsEarned;
     
-    // Update subscribers (now "Cafe Visitors")
-    player.subscribers = newVisitors;
-    this.gameState.updatePlayer(player); // Save the update
-    
-    // Calculate player level based on visitors
+    // Calculate player level based on visitors FIRST
     const oldLevel = this.calculatePlayerLevel(oldVisitors);
     const newLevel = this.calculatePlayerLevel(newVisitors);
+    
+    // Update subscribers (now "Cafe Visitors") and level
+    player.subscribers = newVisitors;
+    player.profile.cafeLevel = newLevel;
+    this.gameState.updatePlayer(player); // Save the update
+    
+    // Emit event to update UI
+    this.eventSystem.emit('player:level_changed', { oldLevel, newLevel });
     const leveledUp = newLevel > oldLevel;
     
     // Get level progress
@@ -470,18 +474,38 @@ export class ShiftRewardsModal {
       </div>
     `;
     
-    // Level up notification
+    // Level up notification with unlock option
     if (leveledUp) {
+      const maxQuestSlots = this.getMaxQuestSlotsForLevel(newLevel);
+      const currentUnlockedSlots = player.unlockedQuestSlots || { bakery: 2, playground: 2, salon: 2 };
+      const totalUnlockedSlots = Object.values(currentUnlockedSlots).reduce((sum, val) => sum + (val || 0), 0);
+      const canUnlock = totalUnlockedSlots < maxQuestSlots * 3; // 3 sections
+      
       html += `
         <div class="level-up-badge">
           <span class="material-icons">star</span>
           <span>Level Up! Now Level ${newLevel}</span>
         </div>
       `;
+      
+      if (canUnlock) {
+        html += `
+          <div class="unlock-hint">
+            <span class="material-icons">lock_open</span>
+            <span>New cafe task slots available to unlock!</span>
+          </div>
+        `;
+      }
     }
     
     html += '</div>';
     return html;
+  }
+
+  private getMaxQuestSlotsForLevel(level: number): number {
+    // Level 1 = 2 (start), Level 2 = 3, Level 3 = 4, ..., Level 10+ = 5 (max per section)
+    // Total slots across 3 sections: Level 1 = 6, Level 2 = 9, ..., Level 10+ = 15
+    return Math.min(5, 1 + level);
   }
 
   private calculatePlayerLevel(visitors: number): number {

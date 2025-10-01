@@ -211,35 +211,126 @@ export class MapSectionScreen extends UnifiedBaseScreen {
   }
 
   private showLockedQuestDialog(): void {
+    const player = this.gameState.getPlayer();
+    const playerLevel = player.profile?.cafeLevel || 1;
+    const maxQuestSlots = this.getMaxQuestSlotsForLevel(playerLevel);
+    const currentUnlockedSlots = player.unlockedQuestSlots?.[this.sectionType] || 2;
+    const canUnlock = currentUnlockedSlots < maxQuestSlots;
+    const unlockCost = 1000;
+    const hasEnoughCoins = (player.currencies?.coins || 0) >= unlockCost;
+    
     const modal = document.createElement('div');
     modal.className = 'confirmation-modal show';
-    modal.innerHTML = `
-      <div class="modal__backdrop"></div>
-      <div class="modal__content confirmation-modal__content">
-        <h3 class="confirmation-title">Quest Slot Locked</h3>
-        <div class="confirmation-body">
-          <div class="unlock-visual">
-            <span class="material-icons unlock-icon">lock</span>
+    
+    if (canUnlock && hasEnoughCoins) {
+      // Can unlock with coins
+      modal.innerHTML = `
+        <div class="modal__backdrop"></div>
+        <div class="modal__content confirmation-modal__content">
+          <h3 class="confirmation-title">Unlock Cafe Task Slot?</h3>
+          <div class="confirmation-body">
+            <div class="unlock-visual">
+              <span class="material-icons unlock-icon">lock_open</span>
+            </div>
+            <p class="confirmation-message">
+              Expand your cafe to handle more tasks at once!
+            </p>
+            <div class="unlock-cost">
+              <span class="material-icons">attach_money</span>
+              <span>${unlockCost} Coins</span>
+            </div>
           </div>
-          <p class="confirmation-message">
-            Level up your cafe by completing tasks to unlock more quest slots!
-          </p>
-          <p class="unlock-hint">
-            Complete more tasks with your pets to bring in more cafe visitors and level up.
-          </p>
+          <div class="confirmation-actions">
+            <button class="btn btn--secondary" id="locked-cancel">Cancel</button>
+            <button class="btn btn--primary" id="locked-unlock">Unlock for ${unlockCost} Coins</button>
+          </div>
         </div>
-        <div class="confirmation-actions">
-          <button class="btn btn--primary" id="locked-ok">Got it!</button>
+      `;
+    } else if (canUnlock && !hasEnoughCoins) {
+      // Not enough coins
+      modal.innerHTML = `
+        <div class="modal__backdrop"></div>
+        <div class="modal__content confirmation-modal__content">
+          <h3 class="confirmation-title">Not Enough Coins</h3>
+          <div class="confirmation-body">
+            <div class="unlock-visual">
+              <span class="material-icons unlock-icon">lock</span>
+            </div>
+            <p class="confirmation-message">
+              You need ${unlockCost} coins to unlock this cafe task slot.
+            </p>
+            <p class="unlock-hint">
+              Complete more tasks to earn coins!
+            </p>
+          </div>
+          <div class="confirmation-actions">
+            <button class="btn btn--primary" id="locked-ok">Got it!</button>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    } else {
+      // Need to level up
+      modal.innerHTML = `
+        <div class="modal__backdrop"></div>
+        <div class="modal__content confirmation-modal__content">
+          <h3 class="confirmation-title">Cafe Task Slot Locked</h3>
+          <div class="confirmation-body">
+            <div class="unlock-visual">
+              <span class="material-icons unlock-icon">lock</span>
+            </div>
+            <p class="confirmation-message">
+              Level up your cafe to unlock more cafe task slots!
+            </p>
+            <p class="unlock-hint">
+              Complete more tasks with your pets to bring in more cafe visitors and level up.
+            </p>
+          </div>
+          <div class="confirmation-actions">
+            <button class="btn btn--primary" id="locked-ok">Got it!</button>
+          </div>
+        </div>
+      `;
+    }
 
     document.body.appendChild(modal);
 
-    // Handle OK
-    const okHandler = () => modal.remove();
-    modal.querySelector('#locked-ok')?.addEventListener('click', okHandler);
-    modal.querySelector('.modal__backdrop')?.addEventListener('click', okHandler);
+    // Handle OK/Cancel
+    const closeModal = () => modal.remove();
+    modal.querySelector('#locked-ok')?.addEventListener('click', closeModal);
+    modal.querySelector('#locked-cancel')?.addEventListener('click', closeModal);
+    modal.querySelector('.modal__backdrop')?.addEventListener('click', closeModal);
+    
+    // Handle Unlock
+    modal.querySelector('#locked-unlock')?.addEventListener('click', () => {
+      // Deduct coins
+      player.currencies = player.currencies || { coins: 0, premiumCurrency: 0, freeGachaCurrency: 0 };
+      player.currencies.coins -= unlockCost;
+      
+      // Unlock the slot
+      player.unlockedQuestSlots = player.unlockedQuestSlots || { bakery: 2, playground: 2, salon: 2 };
+      player.unlockedQuestSlots[this.sectionType] = (player.unlockedQuestSlots[this.sectionType] || 2) + 1;
+      
+      // Save player data
+      this.gameState.updatePlayer(player);
+      
+      // Refresh the quest markers
+      this.refreshQuestMarkers();
+      
+      // Show success notification
+      this.eventSystem.emit('alert:show', {
+        title: 'Cafe Task Slot Unlocked!',
+        message: 'You can now assign more pets to tasks.',
+        duration: 3000
+      });
+      
+      closeModal();
+    });
+  }
+
+  private getMaxQuestSlotsForLevel(level: number): number {
+    // Level 1 = 2 (start), Level 2 = 3, Level 3 = 4, ..., Level 10+ = 5 (max per section)
+    // Total slots across 3 sections: Level 1 = 6, Level 2 = 9, ..., Level 10+ = 15
+    return Math.min(5, 1 + level);
   }
 
   private refreshQuestMarkers(): void {
@@ -391,10 +482,8 @@ export class MapSectionScreen extends UnifiedBaseScreen {
             this.updateStats();
             
             // Play completion notification
-            this.eventSystem.emit('game:notification', {
-              type: 'success',
-              message: `Quest "${questState.quest.title}" is complete!`
-            });
+            // Quest completion notification is handled by the rewards modal
+            // No need for separate notification here
           } else {
             // Update timer display
             this.updateQuestMarker(questId);

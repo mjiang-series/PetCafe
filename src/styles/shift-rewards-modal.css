@@ -583,6 +583,46 @@
   animation: pulse 1s infinite;
 }
 
+.unlock-hint {
+  background: rgba(139, 115, 85, 0.1);
+  border: 2px solid var(--color-mocha-light, #D4B5A0);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  color: var(--color-brown, #5C4033);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.unlock-hint .material-icons {
+  color: var(--color-gold, #FFD700);
+  font-size: 1.25rem;
+}
+
+.unlock-cost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: rgba(255, 215, 0, 0.1);
+  border: 2px solid var(--color-gold, #FFD700);
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-brown, #5C4033);
+}
+
+.unlock-cost .material-icons {
+  color: var(--color-gold, #FFD700);
+  font-size: 1.5rem;
+}
+
 /* NPC Reaction in Bond Section */
 .bond-progress-section .npc-reaction {
   display: flex;

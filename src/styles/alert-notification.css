@@ -40,6 +40,7 @@
   opacity: 0;
   transform: translateY(-10px) scale(0.98);
   transition: all 0.2s ease-out;
+  pointer-events: none;
 }
 
 .alert-notification__portrait {

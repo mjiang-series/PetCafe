@@ -242,9 +242,10 @@ export class GachaScreen extends UnifiedBaseScreen {
     // Check if player has enough diamonds
     if (player.currencies.premiumCurrency < diamondsNeeded) {
       // Open shop
-      this.eventSystem.emit('game:notification', {
-        type: 'info',
-        message: 'Not enough diamonds. Visit the shop to purchase more!'
+      this.eventSystem.emit('alert:show', {
+        title: 'Not Enough Diamonds',
+        message: 'Visit the shop to purchase more!',
+        duration: 3000
       });
       this.eventSystem.emit('shop:open', {});
       return;

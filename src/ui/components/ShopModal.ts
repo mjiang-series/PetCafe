@@ -162,9 +162,10 @@ export class ShopModal {
     this.gameState.updatePlayer(player);
 
     // Show success notification
-    this.eventSystem.emit('game:notification', {
-      type: 'success',
-      message: `Purchase successful! +${offer.diamonds} diamonds`
+    this.eventSystem.emit('alert:show', {
+      title: 'Purchase Successful!',
+      message: `+${offer.diamonds} diamonds added to your account.`,
+      duration: 3000
     });
 
     // Update header currency display
