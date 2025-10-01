@@ -43,10 +43,63 @@ export class PetCollectionScreen extends UnifiedBaseScreen {
   onShow(): void {
     this.renderNpcFilters();
     this.updateDisplay();
+    this.setupIntersectionObserver();
   }
 
   onHide(): void {
-    // Cleanup if needed
+    // Cleanup intersection observer
+    if (this.intersectionObserver) {
+      this.intersectionObserver.disconnect();
+      this.intersectionObserver = undefined;
+    }
+  }
+
+  private intersectionObserver?: IntersectionObserver;
+
+  private setupIntersectionObserver(): void {
+    // Clean up existing observer
+    if (this.intersectionObserver) {
+      this.intersectionObserver.disconnect();
+    }
+
+    // Create observer to mark pets as viewed when they come into viewport
+    this.intersectionObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const petCard = entry.target as HTMLElement;
+            const petId = petCard.getAttribute('data-pet-id');
+            if (petId) {
+              this.markPetAsViewed(petId);
+            }
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.5 // Pet must be 50% visible
+      }
+    );
+
+    // Observe all new pet cards
+    const petCards = this.element.querySelectorAll('.pet-card.pet-new');
+    petCards.forEach((card) => {
+      this.intersectionObserver!.observe(card);
+    });
+  }
+
+  private markPetAsViewed(petId: string): void {
+    const player = this.gameState.getPlayer();
+    const pet = player.pets.find(p => p.petId === petId);
+    
+    if (pet && !pet.viewedInCollection) {
+      pet.viewedInCollection = true;
+      this.gameState.updatePlayer({ pets: player.pets });
+      
+      // Emit event to update badges
+      this.eventSystem.emit('pet:viewed_in_collection', { petId });
+    }
   }
 
   protected override setupEventListeners(): void {
@@ -157,28 +210,44 @@ export class PetCollectionScreen extends UnifiedBaseScreen {
 
     // Get all pets
     const allPets = this.getAllPets();
+    const player = this.gameState.getPlayer();
+    
+    // Filter by area
     const filteredPets = this.filterArea === 'all' 
       ? allPets 
       : allPets.filter(p => p.sectionAffinity?.toLowerCase() === this.filterArea);
 
-    // Sort pets: 1) Collected first, 2) By rarity (descending)
-    const sortedPets = filteredPets.sort((a, b) => {
-      const aOwned = this.gachaSystem.playerOwnsPet(a.petId);
-      const bOwned = this.gachaSystem.playerOwnsPet(b.petId);
+    // Only show owned pets
+    const ownedPets = filteredPets.filter(pet => this.gachaSystem.playerOwnsPet(pet.petId));
+
+    // Sort pets: 1) NEW first, 2) By rarity (descending), 3) Alphabetically
+    const sortedPets = ownedPets.sort((a, b) => {
+      const aPlayerPet = player.pets.find(p => p.petId === a.petId);
+      const bPlayerPet = player.pets.find(p => p.petId === b.petId);
       
-      // First sort by ownership (owned first)
-      if (aOwned !== bOwned) {
-        return aOwned ? -1 : 1;
+      const aIsNew = aPlayerPet && !aPlayerPet.viewedInCollection;
+      const bIsNew = bPlayerPet && !bPlayerPet.viewedInCollection;
+      
+      // First: NEW pets at the top
+      if (aIsNew !== bIsNew) {
+        return aIsNew ? -1 : 1;
       }
       
-      // Then sort by rarity (higher rarity first)
+      // Second: Sort by rarity (higher rarity first)
       const rarityOrder = { '5-star': 3, '4-star': 2, '3-star': 1 };
-      return (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0);
+      const rarityDiff = (rarityOrder[b.rarity] || 0) - (rarityOrder[a.rarity] || 0);
+      if (rarityDiff !== 0) {
+        return rarityDiff;
+      }
+      
+      // Third: Sort alphabetically
+      return a.name.localeCompare(b.name);
     });
 
     // Render pet grid
     grid.innerHTML = sortedPets.map(pet => {
-      const owned = this.gachaSystem.playerOwnsPet(pet.petId);
+      const playerPet = player.pets.find(p => p.petId === pet.petId);
+      const isNew = playerPet && !playerPet.viewedInCollection;
       const dupeCount = this.gachaSystem.getDuplicateCount(pet.petId);
       const area = pet.sectionAffinity || 'Unknown';
       
@@ -186,25 +255,28 @@ export class PetCollectionScreen extends UnifiedBaseScreen {
       const transparentPortrait = pet.artRefs?.portrait?.replace('.png', '_transparent.png');
       
       return `
-        <div class="pet-card ${owned ? 'pet-owned' : 'pet-unowned'}" data-pet-id="${pet.petId}">
+        <div class="pet-card pet-owned ${isNew ? 'pet-new' : ''}" data-pet-id="${pet.petId}">
+          ${isNew ? '<div class="new-badge">NEW</div>' : ''}
           <div class="pet-affinity-tag">
             <span class="material-icons icon-sm">place</span>
             <span>${area}</span>
           </div>
           <div class="pet-portrait">
-            ${owned ? 
-              `<img src="${transparentPortrait ? getAssetPath(transparentPortrait) : (pet.artRefs?.portrait ? getAssetPath(pet.artRefs.portrait) : AssetPaths.petPlaceholder())}" alt="${pet.name}" />` :
-              `<div class="pet-silhouette">?</div>`
-            }
+            <img src="${transparentPortrait ? getAssetPath(transparentPortrait) : (pet.artRefs?.portrait ? getAssetPath(pet.artRefs.portrait) : AssetPaths.petPlaceholder())}" alt="${pet.name}" />
           </div>
           <div class="pet-info">
-            <h4 class="pet-name">${owned ? pet.name : '???'}</h4>
+            <h4 class="pet-name">${pet.name}</h4>
             <div class="pet-rarity rarity--${pet.rarity.toLowerCase()}">${pet.rarity}</div>
             ${dupeCount > 0 ? `<div class="dupe-count">×${dupeCount + 1}</div>` : ''}
           </div>
         </div>
       `;
     }).join('');
+    
+    // Setup intersection observer for new pets after rendering
+    requestAnimationFrame(() => {
+      this.setupIntersectionObserver();
+    });
   }
 
 

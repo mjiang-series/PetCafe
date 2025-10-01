@@ -23,6 +23,7 @@ export interface PlayerPet {
   assignedSection?: SectionType;
   affinity?: string; // NPC affinity
   passiveBuffs?: Record<string, number>;
+  viewedInCollection?: boolean; // Track if player has seen this pet in collection
 }
 
 export interface PetStats {

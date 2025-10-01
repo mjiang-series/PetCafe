@@ -92,6 +92,11 @@ export class BottomNavigation {
     this.eventSystem.on('memory:viewed', () => {
       this.updateJournalBadge();
     });
+    
+    // Listen for pet viewed updates
+    this.eventSystem.on('pet:viewed_in_collection', () => {
+      this.updatePetsBadge();
+    });
   }
 
   private handleNavigation(navId: string, screenId: string): void {
@@ -137,14 +142,10 @@ export class BottomNavigation {
 
   private updatePetsBadge(): void {
     const player = this.gameState.getPlayer();
-    const collectedCount = player.pets?.length || 0;
-    const totalCount = 15; // Total pets available
+    // Count only NEW pets (not yet viewed in collection)
+    const newPetsCount = player.pets?.filter(p => !p.viewedInCollection).length || 0;
     
-    if (collectedCount > 0 && collectedCount < totalCount) {
-      this.updateBadge('pets', collectedCount);
-    } else {
-      this.updateBadge('pets', 0);
-    }
+    this.updateBadge('pets', newPetsCount);
   }
 
   private updateJournalBadge(): void {
