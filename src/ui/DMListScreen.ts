@@ -39,6 +39,13 @@ export class DMListScreen extends UnifiedBaseScreen {
   onShow(): void {
     this.loadConversations();
     this.updateDisplay();
+    
+    // Show tutorial on first Messages screen visit
+    this.eventSystem.emit('tutorial:show', {
+      tutorialId: 'tutorial_first_messages',
+      title: "Aria, Kai and Elias are here to help",
+      message: "You don't have to do this by yourself, you know."
+    });
   }
 
   onHide(): void {

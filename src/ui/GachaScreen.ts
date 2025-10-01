@@ -77,6 +77,13 @@ export class GachaScreen extends UnifiedBaseScreen {
       }
     }
     
+    // Show tutorial on first Adopt screen visit
+    this.eventSystem.emit('tutorial:show', {
+      tutorialId: 'tutorial_first_adopt',
+      title: "Moar friends!",
+      message: "Bring home more pets so you can complete all the tasks."
+    });
+    
     this.updateUI();
     this.eventSystem.on('player:currency_changed', this.updateUI.bind(this));
     this.eventSystem.on('gacha:pull_complete', this.handlePullComplete.bind(this));

@@ -43,6 +43,13 @@ export class ShiftRewardsModal {
 
     // Setup close handlers
     this.setupEventListeners();
+    
+    // Show tutorial on first rewards collection
+    this.eventSystem.emit('tutorial:show', {
+      tutorialId: 'tutorial_first_rewards',
+      title: "You're building memories with us!",
+      message: "Check out the Journal if you haven't already."
+    });
   }
 
   private createElement(data: ShiftRewardsData): void {

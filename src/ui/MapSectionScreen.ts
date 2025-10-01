@@ -507,6 +507,13 @@ export class MapSectionScreen extends UnifiedBaseScreen {
     // Set up quest marker event listeners (after DOM is ready)
     this.setupQuestMarkerListeners();
     
+    // Show tutorial on first cafe section visit
+    this.eventSystem.emit('tutorial:show', {
+      tutorialId: 'tutorial_first_cafe_section',
+      title: "Pets help bring visitors!",
+      message: "Complete tasks with pets so you can grow your cafe."
+    });
+    
     // Check and update all quest markers
     this.questStates.forEach((_, questId) => {
       this.updateQuestMarker(questId);

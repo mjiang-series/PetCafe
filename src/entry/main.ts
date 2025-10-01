@@ -20,6 +20,8 @@ import { MemoryDetailScreen } from '../ui/MemoryDetailScreen';
 import { QuickShareModal } from '../ui/components/QuickShareModal';
 import { QuestModal } from '../ui/components/QuestModal';
 import { ShopModal } from '../ui/components/ShopModal';
+import { AlertNotificationSystem } from '../ui/components/AlertNotificationSystem';
+import { NotificationsOverlay } from '../ui/components/NotificationsOverlay';
 import { BlogPublisher } from '../systems/BlogPublisher';
 import { BondProgressionSystem } from '../systems/BondProgressionSystem';
 import { MemoryAchievementSystem } from '../systems/MemoryAchievementSystem';
@@ -66,6 +68,12 @@ class PetCafeGame {
     new QuickShareModal(this.gameState, this.eventSystem, this.blogPublisher);
     new QuestModal(this.eventSystem, this.gameState);
     new ShopModal(this.eventSystem, this.gameState);
+    
+    // Initialize alert notification system
+    const alertSystem = new AlertNotificationSystem(this.eventSystem, this.gameState);
+    
+    // Initialize notifications overlay
+    new NotificationsOverlay(this.eventSystem, this.gameState);
     
     // Initialize achievement system
     this.memoryAchievementSystem = new MemoryAchievementSystem(this.eventSystem, this.gameState);
@@ -348,7 +356,12 @@ class PetCafeGame {
       // Navigate to café overview
       this.uiManager.showScreen('cafe-overview');
       
-      this.uiManager.showSuccess('Welcome to Pet Café! You\'ve adopted your first pets!');
+      // Show tutorial welcome alert
+      this.eventSystem.emit('tutorial:show', {
+        tutorialId: AlertNotificationSystem.TUTORIALS.NEW_GAME.id,
+        title: AlertNotificationSystem.TUTORIALS.NEW_GAME.title,
+        message: AlertNotificationSystem.TUTORIALS.NEW_GAME.message
+      });
       
     } catch (error) {
       console.error('[PetCafe] Failed to start new game:', error);
@@ -394,11 +407,10 @@ class PetCafeGame {
 
   private async saveGame(): Promise<void> {
     const success = await this.saveSystem.save(this.gameState.getState());
-    if (success) {
-      this.uiManager.showSuccess('Game saved successfully');
-    } else {
+    if (!success) {
       this.uiManager.showError('Failed to save game');
     }
+    // Success saves are silent - no notification needed
   }
 
   private resetGame(): void {

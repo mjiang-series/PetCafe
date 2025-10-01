@@ -14,6 +14,8 @@
 @import './quest-modal.css';
 @import './map-section.css';
 @import './shop-modal.css';
+@import './alert-notification.css';
+@import './notifications-overlay.css';
 
 /* Base styles */
 :root {
