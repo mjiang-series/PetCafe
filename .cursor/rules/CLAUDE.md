@@ -1,0 +1,306 @@
+# VibeForge
+
+Vibeforge is a is a tool which is used to create, manage, and deploy games within thr venus environment. It contains templates for making H5 games as well as a command line interface for easy use of vibeforge as a whole. It is recommended that all interaction with Vibeforge is done through the command line.
+
+## Command Line Interface (CLI)
+
+The command line interface is the intended method for utilizing Vibeforge. It is possible to achieve everything you need regarding creating, managing, and deploying games to venus.
+
+## NAME
+
+vf - Vibeforge game development and deployment tool
+
+## SYNOPSIS
+
+```bash
+vf help
+vf login
+vf logout
+vf whoami
+vf games
+vf submit
+vf create
+vf init
+```
+
+## DESCRIPTION
+
+vf is the Vibeforge command line interface for creating, managing, and deploying HTML5 games within the Venus environment. It provides a comprehensive set of tools for game development workflow including project creation, authentication, game submission, and version management.
+
+All interactions with Vibeforge should be performed through this command line interface. The tool is compatible with CI/CD pipelines and automation scripts.
+
+## HTML5 games
+
+HTML 5 games are the backbone of Vibeforge. An HTML 5 game is any directory which conceptually contains an HTML 5 standalone project. What is meant by the term 'standalone' is that the game can be fully executed simply by opening the index.html file within a browser.
+
+Vibeforge is similar to node projects in that many vf commands only work when inside an HTML5 game directory. Running `vf create` is analogous to running `create-react-app` where it creates a directory containing a template for an HTML 5 game. Navigating to that directory and invoking `vf submit` will then submit that game to venus. Thus, many of the commands require being in the correct directory in order for them to work.
+
+## GLOBAL OPTIONS
+
+--version
+: Display the current version of Vibeforge and check for available updates.
+
+## COMMANDS
+
+### help
+
+`vf [help]`
+
+Display usage information and list all available commands. This is the default behavior when no command is specified.
+
+Exit Status: 0 on success.
+
+### login
+
+`vf login`
+
+Authenticate user via Firebase OAuth. Opens the default web browser for authentication and saves session information for subsequent commands. Requires TTY (An interactive terminal) in order to open a browser for authenticating. THUS THIS COMMAND NEEDS TO BE MANUALLY RUN BY A USER.
+
+Exit Status: 0 on successful authentication, 1 on failure.
+
+### logout
+
+`vf logout`
+
+Clear the current user session and remove stored authentication data. If no user is currently logged in, displays a warning message.
+
+Exit Status: 0 on success.
+
+### whoami
+
+`vf whoami`
+
+Display current user session information including developer details and authentication status.
+
+Output when authenticated:
+
+```text
+Current User Information
+
+  Name: [User's display name]
+  User ID: [Firebase user ID]
+  Session Expires: [Formatted expiration date and time]
+```
+
+Output when not authenticated:
+
+```text
+⚠ You are not logged in
+
+Use vf login to sign in to your account.
+```
+
+Exit Status: 0 if logged in, 1 if not authenticated.
+
+### games
+
+`vf games`
+
+List all games which have been submitted, associated with the currently authenticated user account. Does not show created games which have not been submitted.
+
+Output when games are found:
+
+```text
+🎮 [User's Name]'s Games
+
+Found [N] game(s):
+
+1. Game Name (status)
+   Game description (if available)
+   Created: MM/DD/YYYY
+   Versions: N (latest: v1.0.0)
+   Repository: https://github.com/user/repo (if available)
+
+2. Another Game (draft)
+   Another game description
+   Created: MM/DD/YYYY
+   Versions: 1 (latest: v0.1.0)
+```
+
+Output when no games are found:
+
+```text
+🎮 [User's Name]'s Games
+
+No games found.
+
+Create your first game with vf games create
+```
+
+Output when not authenticated:
+
+```text
+⚠️  You are not logged in
+
+🔐 Starting automatic login process...
+```
+
+Prerequisites: User must be logged in via vf login (automatic login will be attempted if not authenticated).
+
+Exit Status: 0 on success, 1 if not authenticated or on error.
+
+### submit
+
+Submit a new game or update an existing game on the Vibeforge platform. Submitting a new game will publish the game to the venus platform. If the game already exists, and the --update-type flag is used venus, upon receiving the update, will publish a new versioned instance of the game. Submitted games will be viewable via the `games` command.
+
+Must be run from within an HTML5 game directory.
+
+#### New Game Submission
+
+`vf submit --name "Game Name" --description "Game Description" [OPTIONS]`
+
+Submit a new game to the Vibeforge platform.
+
+Required Options:
+--name "Game Name"
+: Specify the display name for the game. Must be quoted if contains spaces.
+
+--description "Game Description"
+: Provide a description of the game. Must be quoted if contains spaces.
+
+Optional Options:
+--path "Directory"
+: Path to game directory. Defaults to current working directory if not supplied.
+
+--category "category"
+: Game category classification. Whatever you want the category to be. Must be quoted if contains spaces.
+
+--tags "tag1,tag2,tag3"
+: Comma-separated list of tags for game classification. Must be quoted.
+
+--policy [permissive|balanced|strict|paranoid|disabled]
+: Security policy level. Valid values: "permissive", "balanced", "strict", "paranoid", "disabled". Defaults to "balanced".
+
+--changelog "Release notes"
+: Optional release notes or changelog for this version. Describes what's new or changed in this version.
+
+#### Update Existing Game
+
+`vf submit --update-type [major|minor|patch] [OPTIONS]`
+
+Submits a newer version of an existing game to venus in order to update venus' online catalog. This command should only be used when a .vibeforge file exists in the current directory as the .vibeforge file contains information about the published game that is required by venus to update.
+
+Required Options:
+--update-type [patch|minor|major]
+: Version update type. Valid values: "patch", "minor", "major".
+
+Optional Options:
+--policy *POLICY*
+: Security policy level. Valid values: "permissive", "balanced", "strict", "paranoid", "disabled". Defaults to "balanced".
+
+--changelog "Release notes"
+: Optional release notes or changelog for this version update. Describes what's new, fixed, or changed in this version.
+
+Prerequisites:
+
+- User must be logged in via vf login.
+- User must be in an HTML 5 game directory
+- For updates: A .vibeforge file must exist in the current directory.
+
+Exit Status: 0 on successful submission/update, 1 on error.
+
+Examples:
+
+New game submission:
+
+```bash
+vf submit --name "Space Adventure" --description "An exciting space exploration game" --category "adventure" --tags "space,action,3d" --changelog "Initial release with basic gameplay"
+```
+
+Updating existing game:
+
+```bash
+vf submit --update-type patch --changelog "Fixed collision detection bug"
+vf submit --update-type minor --changelog "Added new power-ups and levels"
+vf submit --update-type major --changelog "Complete gameplay overhaul"
+```
+
+### create
+
+`vf create "Project Name" --description "Description" --developer "Developer Name" "Directory"`
+
+Create a new HTML 5 game project with initial template structure.
+
+Arguments:
+"Project Name"
+: Name of the new project (required, first positional argument). Project name can only contain lowercase letters, numbers, and hyphens.
+
+"Directory"
+: Optional target directory path (second positional argument).
+
+Required Options:
+--description *"Project Description"*
+: Provide a description of the project (must be quoted if contains spaces).
+
+--developer *"Developer Name"*
+: Specify the developer or studio name (must be quoted if contains spaces).
+
+Exit Status: 0 on successful creation, 1 on error.
+
+Example:
+
+```bash
+vf create my-awesome-game --description "An exciting adventure game" --developer "Your Studio" ./games/
+```
+
+output when a game is succesfully created:
+
+```text
+Project: "Project Name"
+Location: /home/cooper/vibeforge-html5-template/project-name
+
+Next steps:
+1. cd project-name
+2. Open index.html in your browser
+3. Start developing your game!
+4. Submit with: vf submit
+```
+
+### init
+
+`vf init`
+
+`init` is meant to be used if you already have an HTML 5 game that you developed outside of the Vibeforge environment, but want to port it into the Viebforge environment. `init` initializes the current directory with Vibeforge rules and the Venus SDK. Sets up the necessary configuration files and development environment.
+
+This way, you can integrate the many tools and features available specifically within venus into a pre-existing HTML 5 game.
+
+Exit Status: 0 on successful initialization, 1 on error.
+
+Prerequisites:
+
+- User must be logged in via vf login.
+- User must be in an HTML 5 game directory
+
+## EXAMPLES
+
+Create and submit a new game:
+
+```bash
+vf login
+vf create space-shooter --description "Fast-paced space combat" --developer "Game Studio"
+cd space-shooter
+# ... develop your game ...
+vf submit --name "space-shooter" --description "Defend Earth from alien invasion" --category "arcade" --tags "space,action,shooter" --changelog "Initial release"
+```
+
+Update an existing game:
+
+```bash
+cd my-existing-game
+# ... make changes ...
+vf submit --update-type minor --changelog "Added new levels and improved graphics"
+```
+
+Importing an existing HTML 5 game:
+
+```bash
+cd my-existing-game
+vf init
+```
+
+Check authentication and list games:
+
+```bash
+vf whoami
+vf games
+```
