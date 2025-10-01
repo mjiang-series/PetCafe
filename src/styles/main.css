@@ -13,6 +13,7 @@
 @import './persistent-header.css';
 @import './quest-modal.css';
 @import './map-section.css';
+@import './shop-modal.css';
 
 /* Base styles */
 :root {

@@ -19,6 +19,7 @@ import { JournalScreen } from '../ui/JournalScreen';
 import { MemoryDetailScreen } from '../ui/MemoryDetailScreen';
 import { QuickShareModal } from '../ui/components/QuickShareModal';
 import { QuestModal } from '../ui/components/QuestModal';
+import { ShopModal } from '../ui/components/ShopModal';
 import { BlogPublisher } from '../systems/BlogPublisher';
 import { BondProgressionSystem } from '../systems/BondProgressionSystem';
 import { MemoryAchievementSystem } from '../systems/MemoryAchievementSystem';
@@ -64,6 +65,7 @@ class PetCafeGame {
     // Initialize UI components
     new QuickShareModal(this.gameState, this.eventSystem, this.blogPublisher);
     new QuestModal(this.eventSystem, this.gameState);
+    new ShopModal(this.eventSystem, this.gameState);
     
     // Initialize achievement system
     this.memoryAchievementSystem = new MemoryAchievementSystem(this.eventSystem, this.gameState);

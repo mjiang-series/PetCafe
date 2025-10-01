@@ -453,7 +453,7 @@ export class GameStateManager {
       },
       currencies: {
         coins: 1000,
-        premiumCurrency: 50,
+        premiumCurrency: 200, // Start with 200 diamonds
         freeGachaCurrency: 10 // Start with 10 gacha tickets
       },
       pets: [],

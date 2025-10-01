@@ -69,7 +69,7 @@ export class PersistentHeader {
 
     // Shop button for diamonds
     this.element.querySelector('[data-action="shop-diamonds"]')?.addEventListener('click', () => {
-      this.eventSystem.emit('ui:show_screen', { screenId: 'shop', data: { tab: 'diamonds' } });
+      this.eventSystem.emit('shop:open', {});
     });
 
     // Notifications button

@@ -210,21 +210,97 @@ export class GachaScreen extends UnifiedBaseScreen {
       countDisplay.textContent = `${progress.owned}/${progress.total}`;
     }
 
-    // Update button states
-    const singleBtn = this.element.querySelector('[data-action="pull-single"]') as HTMLButtonElement;
-    const tenBtn = this.element.querySelector('[data-action="pull-ten"]') as HTMLButtonElement;
-    
-    if (singleBtn) {
-      singleBtn.disabled = this.isPulling || player.currencies.freeGachaCurrency < 1;
-    }
-    if (tenBtn) {
-      tenBtn.disabled = this.isPulling || player.currencies.freeGachaCurrency < 10;
-    }
+    // Buttons are never disabled - we handle insufficient funds in performPull
   }
 
   private async performPull(type: 'single' | 'ten'): Promise<void> {
     if (this.isPulling) return;
 
+    const player = this.gameState.getPlayer();
+    const ticketsNeeded = type === 'single' ? 1 : 10;
+    const ticketsHave = player.currencies.freeGachaCurrency;
+
+    // Check if player has enough tickets
+    if (ticketsHave >= ticketsNeeded) {
+      // Proceed with normal pull
+      this.executePull(type);
+      return;
+    }
+
+    // Calculate diamond exchange needed
+    const ticketsShort = ticketsNeeded - ticketsHave;
+    const DIAMONDS_PER_TICKET = 150;
+    const diamondsNeeded = ticketsShort * DIAMONDS_PER_TICKET;
+
+    // Check if player has enough diamonds
+    if (player.currencies.premiumCurrency < diamondsNeeded) {
+      // Open shop
+      this.eventSystem.emit('game:notification', {
+        type: 'info',
+        message: 'Not enough diamonds. Visit the shop to purchase more!'
+      });
+      this.eventSystem.emit('shop:open', {});
+      return;
+    }
+
+    // Show confirmation dialog
+    this.showPurchaseConfirmation(ticketsShort, diamondsNeeded, type);
+  }
+
+  private showPurchaseConfirmation(ticketsNeeded: number, diamondsNeeded: number, pullType: 'single' | 'ten'): void {
+    const modal = document.createElement('div');
+    modal.className = 'confirmation-modal show';
+    modal.innerHTML = `
+      <div class="modal__backdrop"></div>
+      <div class="modal__content confirmation-modal__content">
+        <h3 class="confirmation-title">Exchange Diamonds?</h3>
+        <div class="confirmation-body">
+          <div class="exchange-visual">
+            <div class="exchange-item">
+              <span class="material-icons exchange-icon">diamond</span>
+              <span class="exchange-amount">${diamondsNeeded}</span>
+            </div>
+            <div class="exchange-arrow">
+              <span class="material-icons">arrow_forward</span>
+            </div>
+            <div class="exchange-item">
+              <span class="material-icons exchange-icon">confirmation_number</span>
+              <span class="exchange-amount">${ticketsNeeded}</span>
+            </div>
+          </div>
+          <p class="confirmation-message">
+            You need ${ticketsNeeded} more ticket${ticketsNeeded > 1 ? 's' : ''}. 
+            Exchange ${diamondsNeeded} diamonds to complete this pull?
+          </p>
+        </div>
+        <div class="confirmation-actions">
+          <button class="btn btn--secondary" id="confirm-cancel">Cancel</button>
+          <button class="btn btn--primary" id="confirm-exchange">Exchange & Pull</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Handle confirmation
+    modal.querySelector('#confirm-exchange')?.addEventListener('click', () => {
+      const player = this.gameState.getPlayer();
+      player.currencies.premiumCurrency -= diamondsNeeded;
+      player.currencies.freeGachaCurrency += ticketsNeeded;
+      this.gameState.updatePlayer(player);
+      this.eventSystem.emit('player:currencies_updated', {});
+      
+      modal.remove();
+      this.executePull(pullType);
+    });
+
+    // Handle cancel
+    const cancelHandler = () => modal.remove();
+    modal.querySelector('#confirm-cancel')?.addEventListener('click', cancelHandler);
+    modal.querySelector('.modal__backdrop')?.addEventListener('click', cancelHandler);
+  }
+
+  private async executePull(type: 'single' | 'ten'): Promise<void> {
     this.isPulling = true;
     this.updateUI();
 
@@ -238,7 +314,7 @@ export class GachaScreen extends UnifiedBaseScreen {
       }
 
       if (!pull) {
-        // Insufficient funds - handled by gacha system events
+        // Insufficient funds - shouldn't happen now but handle anyway
         this.isPulling = false;
         this.updateUI();
         return;

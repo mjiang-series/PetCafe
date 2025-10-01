@@ -7,6 +7,130 @@
   background: linear-gradient(to bottom, #FFF5E6, #FFE0CC);
 }
 
+/* Confirmation Modal */
+.confirmation-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.confirmation-modal.show {
+  opacity: 1;
+}
+
+.confirmation-modal .modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.confirmation-modal__content {
+  position: relative;
+  background: white;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 400px;
+  padding: var(--spacing-lg);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.confirmation-title {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: 1.5rem;
+  text-align: center;
+  color: var(--color-text);
+}
+
+.confirmation-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.exchange-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: linear-gradient(135deg, #FFF5E6 0%, #FFE0CC 100%);
+  border-radius: 12px;
+}
+
+.exchange-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.exchange-icon {
+  font-size: 3rem;
+  color: #FFD700;
+}
+
+.exchange-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.exchange-arrow {
+  font-size: 2rem;
+  color: var(--color-text-light);
+}
+
+.confirmation-message {
+  text-align: center;
+  font-size: 1rem;
+  color: var(--color-text);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.confirmation-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.confirmation-actions .btn {
+  flex: 1;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.confirmation-actions .btn--secondary {
+  background: #E0E0E0;
+  color: var(--color-text);
+}
+
+.confirmation-actions .btn--secondary:hover {
+  background: #D0D0D0;
+}
+
+.confirmation-actions .btn--primary {
+  background: linear-gradient(135deg, #4CAF50 0%, #45A049 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.confirmation-actions .btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
+}
+
 /* Header */
 .gacha-screen__header {
   display: flex;
