@@ -117,7 +117,8 @@ export class MemoryDetailScreen extends UnifiedBaseScreen {
     });
 
     // Get pets
-    const pets = this.memory.petIds.map(petId => getPetById(petId)).filter(p => p !== null);
+    const petIds = this.memory.taggedPets || this.memory.petIds || [];
+    const pets = petIds.map(petId => getPetById(petId)).filter(p => p !== null);
 
     container.innerHTML = `
       <div class="profile-hero">

@@ -308,33 +308,34 @@ export class DMScreen extends UnifiedBaseScreen {
 
   private getQuickReplies(): string[] {
     const timeOfDay = this.responseService.getTimeOfDay();
+    // Spunky, headstrong, friendly and warm personality
     const baseReplies: Record<string, string[]> = {
       aria: [
-        "They're doing great! 😊",
-        "Just finished a shift",
-        "Any baking tips?",
-        "What's today's special?"
+        "Pets are crushing it today! 💪",
+        "Just wrapped up - we killed it!",
+        "Ooh, teach me your secrets!",
+        "Hit me with the deets! What's cookin'?"
       ],
       kai: [
-        "Let's play! 🎾",
-        "The pets are ready!",
-        "What games today?",
-        "Time for fun!"
+        "Let's DO this! Race you! 🎾",
+        "They're pumped and ready to go!",
+        "Bring on the fun - what's the plan?",
+        "Time to shake things up!"
       ],
       elias: [
-        "They'd love that! 💕",
-        "Perfect timing",
-        "Show me the styles!",
-        "How artistic!"
+        "They're gonna LOVE that! 💕",
+        "Perfect! Let's make it happen",
+        "Show me what you got!",
+        "Your creativity is awesome!"
       ]
     };
 
-    // Add time-based quick replies
+    // Add time-based quick replies with personality
     const timeReplies: Record<string, string> = {
-      morning: "Good morning! ☀️",
-      afternoon: "How's your day?",
-      evening: "Nice evening! 🌙",
-      night: "Still awake? 🌟"
+      morning: "Morning! Let's make today epic! ☀️",
+      afternoon: "Hey! How's it going?",
+      evening: "Evening! What a day, huh? 🌙",
+      night: "You're up late! Me too 🌟"
     };
 
     const npcReplies = baseReplies[this.npcId] || ["Hello!", "How are you?", "👋"];
@@ -372,9 +373,20 @@ export class DMScreen extends UnifiedBaseScreen {
   }
 
   private generateResponse(playerMessage: string): string {
+    // Get recent message history for context
+    const recentMessages = this.messages.slice(-5); // Last 5 messages
+    const previousPlayerMessage = recentMessages
+      .filter(m => m.sender === 'player')
+      .slice(-2, -1)[0]; // Second to last player message
+    
     const context: ResponseContext = {
       messageType: 'general',
       playerMessage: playerMessage,
+      previousMessage: previousPlayerMessage?.content,
+      conversationHistory: recentMessages.map(m => ({
+        sender: m.sender,
+        content: m.content
+      })),
       timeOfDay: this.responseService.getTimeOfDay(),
       recentActivity: {
         newPets: this.gameState.getState().player.recentPetAcquisitions
@@ -384,32 +396,32 @@ export class DMScreen extends UnifiedBaseScreen {
     };
 
     // Determine context for response
-    const greetingKeywords = ['hi', 'hello', 'hey', 'morning', 'evening', 'good'];
-    if (greetingKeywords.some(word => playerMessage.toLowerCase().includes(word)) && 
-        playerMessage.length < 20) {
+    const msgLower = playerMessage.toLowerCase();
+    const greetingKeywords = ['hi', 'hello', 'hey', 'morning', 'evening', 'good', 'sup'];
+    
+    if (greetingKeywords.some(word => msgLower.includes(word)) && 
+        playerMessage.length < 30) {
       context.messageType = 'greeting';
-    }
-
-    // Check for memory-related messages
-    if (playerMessage.toLowerCase().includes('memory') || 
-        playerMessage.toLowerCase().includes('remember') ||
-        playerMessage.toLowerCase().includes('moment')) {
+    } else if (msgLower.includes('memory') || msgLower.includes('remember') || msgLower.includes('moment')) {
       context.messageType = 'memory';
-      // TODO: Get recent memory from game state
-      context.recentActivity = {
-        lastMemory: "playing with pets"
-      };
-    }
-
-    // Check for bond-related messages
-    if (playerMessage.toLowerCase().includes('friend') || 
-        playerMessage.toLowerCase().includes('bond') ||
-        playerMessage.toLowerCase().includes('close')) {
+      const recentMemories = this.gameState.getState().player.memories || [];
+      if (recentMemories.length > 0) {
+        const lastMemory = recentMemories[0];
+        context.recentActivity = {
+          lastMemory: lastMemory.snippet || lastMemory.title
+        };
+      }
+    } else if (msgLower.includes('friend') || msgLower.includes('bond') || msgLower.includes('close') || msgLower.includes('love')) {
       context.messageType = 'bond';
-      context.bondLevel = 2; // TODO: Get actual bond level from game state
+      const bond = this.gameState.getState().player.npcBonds.find(b => b.npcId === this.npcId);
+      context.bondLevel = bond?.bondLevel || 1;
+    } else if (msgLower.includes('pet') || msgLower.includes('animal') || msgLower.includes('cute')) {
+      context.messageType = 'pets';
+    } else if (msgLower.includes('quest') || msgLower.includes('task') || msgLower.includes('help')) {
+      context.messageType = 'quest';
     }
 
-    return this.responseService.generateResponse(this.npcId, context) || "I'm not sure what to say...";
+    return this.responseService.generateResponse(this.npcId, context) || "I appreciate you reaching out! Let's chat more soon.";
   }
 
   private sendMessage(content: string): void {

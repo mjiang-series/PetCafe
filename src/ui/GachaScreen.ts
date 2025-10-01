@@ -11,6 +11,7 @@ export class GachaScreen extends UnifiedBaseScreen {
   private isPulling: boolean = false;
   private currentPull: GachaPull | undefined;
   private animationTimeout?: number;
+  private activeTab: 'standard' | 'limited' = 'standard';
 
   constructor(id: string, eventSystem: EventSystem, gameState: GameStateManager, gachaSystem: GachaSystem) {
     super(id, eventSystem, gameState);
@@ -25,43 +26,8 @@ export class GachaScreen extends UnifiedBaseScreen {
   protected createContent(): string {
     return `
       <div class="gacha-screen__content">
-        <!-- Banner Display -->
-        <div class="gacha-banner">
-          <div class="banner-image">
-            <img src="${AssetPaths.gachaBanner()}" alt="Pet Adoption Center" />
-          </div>
-          <div class="banner-info">
-            <h3>Adopt Pets, Grow Bonds</h3>
-            <p>Every new friend brightens a helper’s day. Watch for bond boosts!</p>
-          </div>
-        </div>
-        
-        
-        <!-- Pull Buttons -->
-        <div class="gacha-actions">
-          <button class="btn btn--primary btn--large gacha-pull-btn" data-action="pull-single">
-            <span class="pull-cost">
-              <span class="material-icons icon-sm">confirmation_number</span> 1 Ticket
-            </span>
-            <span class="pull-label">Single Pull</span>
-          </button>
-          
-          <button class="btn btn--primary btn--large gacha-pull-btn" data-action="pull-ten">
-            <span class="pull-cost">
-              <span class="material-icons icon-sm">confirmation_number</span> 10 Tickets
-            </span>
-            <span class="pull-label">10x Pull</span>
-          </button>
-        </div>
-        
-        <!-- Rates Info -->
-        <div class="gacha-rates">
-          <button class="rates-toggle" data-action="show-rates">
-            <span class="material-icons icon-sm">info</span> Drop Rates
-          </button>
-        </div>
+        ${this.createContentHTML()}
       </div>
-      
       
       <!-- Rates Modal -->
       <div class="gacha-rates-modal" id="rates-modal" style="display: none;">
@@ -125,8 +91,82 @@ export class GachaScreen extends UnifiedBaseScreen {
     }
   }
 
+  private updateDisplay(): void {
+    // Re-render the content area
+    const contentArea = this.element.querySelector('.gacha-screen__content');
+    if (contentArea) {
+      contentArea.innerHTML = this.createContentHTML();
+      this.setupEventListeners(); // Re-attach event listeners
+    }
+  }
+
+  private createContentHTML(): string {
+    const bannerImage = this.activeTab === 'standard' 
+      ? getAssetPath('art/ui/gacha_hero_banner.png')
+      : getAssetPath('art/ui/gacha_hero_banner_limited.png');
+    
+    return `
+      <!-- Tab Navigation -->
+      <div class="gacha-tabs">
+        <button class="gacha-tab ${this.activeTab === 'standard' ? 'active' : ''}" data-tab="standard">
+          <span class="material-icons">home</span>
+          <span>Standard</span>
+        </button>
+        <button class="gacha-tab ${this.activeTab === 'limited' ? 'active' : ''}" data-tab="limited">
+          <span class="material-icons">star</span>
+          <span>Limited Time</span>
+        </button>
+      </div>
+
+      <!-- Banner Display -->
+      <div class="gacha-banner">
+        <div class="banner-image">
+          <img src="${bannerImage}" alt="Pet Adoption Center" />
+        </div>
+        <div class="banner-info">
+          <h3>${this.activeTab === 'standard' ? 'Adopt Pets, Grow Bonds' : 'Limited Time Event!'}</h3>
+          <p>${this.activeTab === 'standard' ? 'Every new friend brightens a helper\'s day. Watch for bond boosts!' : 'Rare pets available for a limited time only!'}</p>
+        </div>
+      </div>
+      
+      
+      <!-- Pull Buttons -->
+      <div class="gacha-actions">
+        <button class="btn btn--primary btn--large gacha-pull-btn ${this.activeTab === 'limited' ? 'btn--limited' : ''}" data-action="pull-single">
+          <span class="pull-cost">
+            <span class="material-icons icon-sm">confirmation_number</span> 1 Ticket
+          </span>
+          <span class="pull-label">Single Pull</span>
+        </button>
+        
+        <button class="btn btn--primary btn--large gacha-pull-btn ${this.activeTab === 'limited' ? 'btn--limited' : ''}" data-action="pull-ten">
+          <span class="pull-cost">
+            <span class="material-icons icon-sm">confirmation_number</span> 10 Tickets
+          </span>
+          <span class="pull-label">10x Pull</span>
+        </button>
+      </div>
+      
+      <!-- Rates Info -->
+      <div class="gacha-rates">
+        <button class="rates-toggle" data-action="show-rates">
+          <span class="material-icons icon-sm">info</span> Drop Rates
+        </button>
+      </div>
+    `;
+  }
+
   protected override setupEventListeners(): void {
     super.setupEventListeners();
+
+    // Tab switching
+    this.addClickHandler('[data-tab]', (event) => {
+      const tab = (event.target as HTMLElement).closest('[data-tab]')?.getAttribute('data-tab');
+      if (tab === 'standard' || tab === 'limited') {
+        this.activeTab = tab;
+        this.updateDisplay(); // Re-render the content with new tab
+      }
+    });
 
     // Pull actions
     this.addClickHandler('[data-action="pull-single"]', () => {

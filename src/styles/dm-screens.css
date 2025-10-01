@@ -275,6 +275,8 @@
   flex-shrink: 0;
   background: white;
   border-bottom: 1px solid var(--border-color);
+  /* Add top margin to account for floating header */
+  margin-top: calc(var(--header-height) + 60px);
 }
 
 .messages-container {
