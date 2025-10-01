@@ -27,10 +27,7 @@ export class PetCollectionScreen extends UnifiedBaseScreen {
     return `
       <div class="collection-container">
         <div class="collection-header-section">
-          <div>
-            <h2>My Pets</h2>
-            <p class="collection-subtitle">See how each pet strengthens your helper bonds.</p>
-          </div>
+          <h2>My Pets</h2>
         </div>
 
         <div class="collection-filters" id="collection-filters">

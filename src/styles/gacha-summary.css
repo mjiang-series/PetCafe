@@ -130,7 +130,8 @@
 /* Summary Actions */
 .summary-actions {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: var(--spacing-sm);
   padding-top: var(--spacing-md);
   border-top: 1px solid #E0E0E0;
 }
@@ -139,7 +140,105 @@
   min-width: 150px;
 }
 
+/* Pets Summary Grid */
+.gacha-pets-summary {
+  max-width: 800px;
+}
+
+.pets-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.pets-summary-grid .pet-card {
+  position: relative;
+}
+
+.pets-summary-grid .new-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--color-primary, #FF9E80);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 12px;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Rewards Modal (Coins Summary) */
+.rewards-modal {
+  max-width: 500px;
+  text-align: center;
+}
+
+.rewards-description {
+  color: var(--text-secondary);
+  margin: 0 0 var(--spacing-xl);
+  font-size: var(--font-size-md);
+}
+
+.rewards-list {
+  background: var(--bg-secondary, #F5F5F5);
+  border-radius: var(--border-radius-md);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.reward-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: white;
+  border-radius: var(--border-radius-sm);
+}
+
+.reward-icon {
+  font-size: 48px;
+  color: #FFA000;
+}
+
+.reward-details {
+  flex: 1;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+}
+
+.reward-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.reward-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Subtle button style */
+.btn-subtle {
+  opacity: 0.7;
+  font-size: 0.875rem;
+}
+
+.btn-subtle:hover {
+  opacity: 1;
+}
+
 /* Mobile adjustments */
+@media (max-width: 768px) {
+  .pets-summary-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 @media (max-width: 480px) {
   .new-pets-grid {
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
@@ -148,5 +247,9 @@
   .new-pets-grid .pet-portrait {
     width: 60px;
     height: 60px;
+  }
+  
+  .pets-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

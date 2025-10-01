@@ -255,15 +255,22 @@ export class PetProfileScreen extends UnifiedBaseScreen {
 
       ${this.isGachaReveal ? `
         <div class="profile-actions gacha-reveal-actions">
-          <button class="btn btn-secondary" data-action="skip-all">
-            <span class="material-icons">skip_next</span>
-            Skip All
-          </button>
-          ${this.gachaResultIndex < this.gachaTotalResults - 1 ? `
-            <button class="btn btn-primary" data-action="next-pet">
-              <span class="material-icons">arrow_forward</span>
-              Next (${this.gachaResultIndex + 1}/${this.gachaTotalResults})
-            </button>
+          ${this.gachaTotalResults > 1 ? `
+            ${this.gachaResultIndex < this.gachaTotalResults - 1 ? `
+              <button class="btn btn-primary" data-action="next-pet">
+                <span class="material-icons">arrow_forward</span>
+                Next (${this.gachaResultIndex + 1}/${this.gachaTotalResults})
+              </button>
+              <button class="btn btn-secondary btn-subtle" data-action="skip-all">
+                <span class="material-icons">skip_next</span>
+                Skip All
+              </button>
+            ` : `
+              <button class="btn btn-primary" data-action="finish-reveal">
+                <span class="material-icons">check</span>
+                Done
+              </button>
+            `}
           ` : `
             <button class="btn btn-primary" data-action="finish-reveal">
               <span class="material-icons">check</span>
@@ -292,6 +299,14 @@ export class PetProfileScreen extends UnifiedBaseScreen {
   }
 
   private setupEventListeners(): void {
+    // Watch Memory button (available in both gacha reveal and normal view)
+    const watchMemoryBtn = this.element.querySelector('[data-action="watch-memory"]');
+    if (watchMemoryBtn) {
+      watchMemoryBtn.addEventListener('click', () => {
+        this.playMemoryVideo();
+      });
+    }
+    
     // Gacha reveal buttons
     if (this.isGachaReveal) {
       // Skip all button
@@ -335,14 +350,6 @@ export class PetProfileScreen extends UnifiedBaseScreen {
             title: 'Coming Soon',
             message: 'Share feature will be available in a future update!'
           });
-        });
-      }
-      
-      // Watch Memory button
-      const watchMemoryBtn = this.element.querySelector('[data-action="watch-memory"]');
-      if (watchMemoryBtn) {
-        watchMemoryBtn.addEventListener('click', () => {
-          this.playMemoryVideo();
         });
       }
     }

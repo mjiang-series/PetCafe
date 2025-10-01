@@ -354,16 +354,92 @@ export class GachaScreen extends UnifiedBaseScreen {
   private showPullSummary(): void {
     if (!this.currentPull) return;
 
-    // Create a modal to show the summary
+    const isSinglePull = this.currentPull.results.length === 1;
+    const dupes = this.currentPull.results.filter(r => r.isDuplicate);
+    const hasDupes = dupes.length > 0;
+    
+    // For single pulls: only show coins modal if duplicate
+    if (isSinglePull && !hasDupes) {
+      this.isPulling = false;
+      this.currentPull = undefined;
+      this.updateUI();
+      return;
+    }
+    
+    // For single pulls with dupes: skip to coins modal
+    if (isSinglePull && hasDupes) {
+      this.showCoinsSummary();
+      return;
+    }
+    
+    // For bulk pulls: show pet grid first
+    this.showPetsSummary();
+  }
+
+  private showPetsSummary(): void {
+    if (!this.currentPull) return;
+
     const modal = document.createElement('div');
     modal.className = 'gacha-summary-modal';
     modal.innerHTML = `
       <div class="modal__backdrop"></div>
-      <div class="modal__content gacha-summary">
+      <div class="modal__content gacha-pets-summary">
         <h2>Adoption Complete!</h2>
         
-        ${this.renderNewPets()}
-        ${this.renderDuplicateSummary()}
+        <div class="collection-grid pets-summary-grid">
+          ${this.currentPull.results.map(result => this.renderPetCard(result)).join('')}
+        </div>
+        
+        <div class="summary-actions">
+          <button class="btn btn-primary" data-action="next-summary">
+            <span class="material-icons">arrow_forward</span>
+            Continue
+          </button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add event listener for next
+    modal.querySelector('[data-action="next-summary"]')?.addEventListener('click', () => {
+      modal.remove();
+      
+      // Check if there are duplicates to show coins summary
+      const dupes = this.currentPull?.results.filter(r => r.isDuplicate) || [];
+      if (dupes.length > 0) {
+        this.showCoinsSummary();
+      } else {
+        this.isPulling = false;
+        this.currentPull = undefined;
+        this.updateUI();
+      }
+    });
+  }
+
+  private showCoinsSummary(): void {
+    if (!this.currentPull) return;
+    
+    const dupes = this.currentPull.results.filter(r => r.isDuplicate);
+    const totalCoins = dupes.reduce((sum, r) => sum + (r.tokensAwarded || 0), 0);
+
+    const modal = document.createElement('div');
+    modal.className = 'gacha-summary-modal';
+    modal.innerHTML = `
+      <div class="modal__backdrop"></div>
+      <div class="modal__content rewards-modal">
+        <h2>Duplicate Pets</h2>
+        <p class="rewards-description">You already owned ${dupes.length} pet${dupes.length > 1 ? 's' : ''}!</p>
+        
+        <div class="rewards-list">
+          <div class="reward-item">
+            <span class="material-icons reward-icon">payments</span>
+            <div class="reward-details">
+              <span class="reward-label">Coins Earned</span>
+              <span class="reward-value">+${totalCoins}</span>
+            </div>
+          </div>
+        </div>
         
         <div class="summary-actions">
           <button class="btn btn-primary" data-action="close-summary">
@@ -383,14 +459,28 @@ export class GachaScreen extends UnifiedBaseScreen {
       this.currentPull = undefined;
       this.updateUI();
     });
+  }
+
+  private renderPetCard(result: PetPullResult): string {
+    const transparentPortrait = result.pet.artRefs?.portrait?.replace('.png', '_transparent.png');
+    const area = result.pet.sectionAffinity || 'Unknown';
     
-    // Also close on backdrop click
-    modal.querySelector('.modal__backdrop')?.addEventListener('click', () => {
-      modal.remove();
-      this.isPulling = false;
-      this.currentPull = undefined;
-      this.updateUI();
-    });
+    return `
+      <div class="pet-card pet-owned ${result.isNew ? 'pet-new' : ''}">
+        ${result.isNew ? '<div class="new-badge">NEW</div>' : ''}
+        <div class="pet-affinity-tag">
+          <span class="material-icons icon-sm">place</span>
+          <span>${area}</span>
+        </div>
+        <div class="pet-portrait">
+          <img src="${transparentPortrait ? getAssetPath(transparentPortrait) : (result.pet.artRefs?.portrait ? getAssetPath(result.pet.artRefs.portrait) : AssetPaths.petPlaceholder())}" alt="${result.pet.name}" />
+        </div>
+        <div class="pet-info">
+          <h4 class="pet-name">${result.pet.name}</h4>
+          <div class="pet-rarity rarity--${result.rarity.toLowerCase()}">${result.rarity}</div>
+        </div>
+      </div>
+    `;
   }
 
 
