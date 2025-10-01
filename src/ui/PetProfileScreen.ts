@@ -194,7 +194,7 @@ export class PetProfileScreen extends UnifiedBaseScreen {
               muted
               playsinline
             ></video>` :
-            `<img src="${getAssetPath('art/pets/pet_profile_placeholder.png')}" alt="${this.pet.name}" class="profile-image" />`
+            `<img src="${getAssetPath(this.pet.artRefs?.portrait || 'art/pets/pet_profile_placeholder.png')}" alt="${this.pet.name}" class="profile-image" />`
           ) :
           `<div class="profile-silhouette">
             <span class="material-icons">pets</span>

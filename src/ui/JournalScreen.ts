@@ -3,12 +3,12 @@ import { ScreenHeaderConfig } from './components/ScreenHeader';
 import { Memory } from '../models';
 import { GameState } from '../systems/GameState';
 import { EventSystem } from '../systems/EventSystem';
-import { getAssetPath } from '../utils/AssetPaths';
+import { getAssetPath, AssetPaths } from '../utils/assetPaths';
 import { getNPCById } from '../utils/NPCData';
 
 interface FilterState {
   section: 'all' | 'bakery' | 'playground' | 'salon';
-  npc: 'all' | 'aria' | 'kai' | 'elias';
+  area: 'all' | 'bakery' | 'playground' | 'salon';
   mood: 'all' | string;
   special: 'all' | 'unviewed' | 'shared' | 'favorited';
 }
@@ -18,7 +18,7 @@ export class JournalScreen extends UnifiedBaseScreen {
   private filteredMemories: Memory[] = [];
   private filters: FilterState = {
     section: 'all',
-    npc: 'all',
+    area: 'all',
     mood: 'all',
     special: 'all'
   };
@@ -73,35 +73,42 @@ export class JournalScreen extends UnifiedBaseScreen {
           </div>
         </div>
 
-        <div class="npc-filter-bar">
-          <button class="npc-filter-option active" data-npc="all">
-            <span class="filter-icon material-icons">apps</span>
-            <span class="filter-label">All</span>
-            <span class="memory-count">${this.memories.length}</span>
+        <div class="collection-filters">
+          <button class="filter-btn area-filter active" data-npc="all">
+            <div class="filter-content">
+              <span class="filter-label">All</span>
+              <span class="filter-progress memory-count">${this.memories.length}</span>
+            </div>
           </button>
           
-          <button class="npc-filter-option" data-npc="aria">
-            <img src="${getAssetPath('art/npc/aria/aria_portrait.png')}" alt="Aria" class="npc-portrait-small" />
-            <span class="filter-label">Aria</span>
-            <span class="memory-count">0</span>
+          <button class="filter-btn area-filter" data-npc="bakery">
+            <div class="filter-image">
+              <img src="${AssetPaths.scenePlaceholder('bakery')}" alt="Bakery" />
+            </div>
+            <div class="filter-content">
+              <span class="filter-label">Bakery</span>
+              <span class="filter-progress memory-count">0</span>
+            </div>
           </button>
           
-          <button class="npc-filter-option" data-npc="kai">
-            <img src="${getAssetPath('art/npc/kai/kai_portrait.png')}" alt="Kai" class="npc-portrait-small" />
-            <span class="filter-label">Kai</span>
-            <span class="memory-count">0</span>
+          <button class="filter-btn area-filter" data-npc="playground">
+            <div class="filter-image">
+              <img src="${AssetPaths.scenePlaceholder('playground')}" alt="Playground" />
+            </div>
+            <div class="filter-content">
+              <span class="filter-label">Playground</span>
+              <span class="filter-progress memory-count">0</span>
+            </div>
           </button>
           
-          <button class="npc-filter-option" data-npc="elias">
-            <img src="${getAssetPath('art/npc/elias/elias_portrait.png')}" alt="Elias" class="npc-portrait-small" />
-            <span class="filter-label">Elias</span>
-            <span class="memory-count">0</span>
-          </button>
-          
-          <button class="npc-filter-option" data-npc="none">
-            <span class="filter-icon material-icons">person_off</span>
-            <span class="filter-label">None</span>
-            <span class="memory-count">0</span>
+          <button class="filter-btn area-filter" data-npc="salon">
+            <div class="filter-image">
+              <img src="${AssetPaths.scenePlaceholder('salon')}" alt="Salon" />
+            </div>
+            <div class="filter-content">
+              <span class="filter-label">Salon</span>
+              <span class="filter-progress memory-count">0</span>
+            </div>
           </button>
         </div>
 
@@ -124,20 +131,20 @@ export class JournalScreen extends UnifiedBaseScreen {
     this.addClickHandler('#prev-month', () => this.navigateMonth(-1));
     this.addClickHandler('#next-month', () => this.navigateMonth(1));
 
-    // NPC filter options
-    this.element.querySelectorAll('.npc-filter-option').forEach(option => {
+    // Area filter options
+    this.element.querySelectorAll('.filter-btn').forEach(option => {
       option.addEventListener('click', (e) => {
         const target = e.currentTarget as HTMLElement;
-        const npcValue = target.dataset.npc || 'all';
+        const areaValue = target.dataset.npc || 'all'; // Still using data-npc attribute for backward compatibility
         
         // Update active state
-        this.element.querySelectorAll('.npc-filter-option').forEach(opt => {
+        this.element.querySelectorAll('.filter-btn').forEach(opt => {
           opt.classList.remove('active');
         });
         target.classList.add('active');
         
         // Update filter
-        this.filters.npc = npcValue as any;
+        this.filters.area = areaValue as any;
         this.applyFilters();
         this.updateMemoryDisplay();
       });
@@ -218,23 +225,11 @@ export class JournalScreen extends UnifiedBaseScreen {
 
   private applyFilters(): void {
     this.filteredMemories = this.memories.filter(memory => {
-      // Section filter
-      if (this.filters.section !== 'all' && memory.location !== this.filters.section) {
-        return false;
-      }
-      
-      // NPC filter
-      if (this.filters.npc !== 'all') {
-        if (this.filters.npc === 'none') {
-          // Filter for memories with no NPCs
-          const hasAnyNPC = (memory.taggedNPCs && memory.taggedNPCs.length > 0) || 
-                           (memory.taggedNpcs && memory.taggedNpcs.length > 0);
-          if (hasAnyNPC) return false;
-        } else {
-          // Filter for specific NPC
-          const hasNPC = memory.taggedNPCs?.includes(this.filters.npc) || 
-                         memory.taggedNpcs?.includes(this.filters.npc);
-          if (!hasNPC) return false;
+      // Area filter (based on location)
+      if (this.filters.area !== 'all') {
+        const memoryLocation = memory.location?.toLowerCase();
+        if (memoryLocation !== this.filters.area) {
+          return false;
         }
       }
       
@@ -492,36 +487,29 @@ export class JournalScreen extends UnifiedBaseScreen {
   }
 
   private updateNPCFilterCounts(): void {
-    const npcCounts: Record<string, number> = {
-      aria: 0,
-      kai: 0,
-      elias: 0,
-      none: 0
+    const areaCounts: Record<string, number> = {
+      bakery: 0,
+      playground: 0,
+      salon: 0
     };
     
     this.memories.forEach(memory => {
-      const npcs = memory.taggedNPCs || memory.taggedNpcs || [];
-      if (npcs.length === 0) {
-        npcCounts.none++;
-      } else {
-        npcs.forEach(npcId => {
-          if (npcCounts[npcId] !== undefined) {
-            npcCounts[npcId]++;
-          }
-        });
+      const location = memory.location?.toLowerCase();
+      if (location && areaCounts[location] !== undefined) {
+        areaCounts[location]++;
       }
     });
     
     // Update UI
-    Object.entries(npcCounts).forEach(([npcId, count]) => {
-      const element = this.element.querySelector(`.npc-filter-option[data-npc="${npcId}"] .memory-count`);
+    Object.entries(areaCounts).forEach(([area, count]) => {
+      const element = this.element.querySelector(`.filter-btn[data-npc="${area}"] .memory-count`);
       if (element) {
         element.textContent = count.toString();
       }
     });
     
     // Update "All" count
-    const allElement = this.element.querySelector('.npc-filter-option[data-npc="all"] .memory-count');
+    const allElement = this.element.querySelector('.filter-btn[data-npc="all"] .memory-count');
     if (allElement) {
       allElement.textContent = this.memories.length.toString();
     }

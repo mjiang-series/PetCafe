@@ -11,7 +11,7 @@ import { getNPCById } from '../utils/npcData';
 
 export class PetCollectionScreen extends UnifiedBaseScreen {
   private gachaSystem: GachaSystem;
-  private filterNpc: string | 'all' = 'all';
+  private filterArea: string | 'all' = 'all';
 
   constructor(id: string, eventSystem: EventSystem, gameState: GameStateManager, gachaSystem: GachaSystem) {
     super(id, eventSystem, gameState);
@@ -75,7 +75,7 @@ export class PetCollectionScreen extends UnifiedBaseScreen {
   }
 
   private setFilter(filter: string | 'all'): void {
-    this.filterNpc = filter;
+    this.filterArea = filter;
     
     // Update button states
     this.element.querySelectorAll('.filter-btn').forEach(btn => {
@@ -89,42 +89,49 @@ export class PetCollectionScreen extends UnifiedBaseScreen {
     const filtersContainer = this.element.querySelector('#collection-filters');
     if (!filtersContainer) return;
 
-    // Calculate collection progress for each NPC
+    // Calculate collection progress for each Cafe Area
     const allPets = this.getAllPets();
-    const npcStats: Record<string, { total: number; owned: number }> = {
-      aria: { total: 0, owned: 0 },
-      kai: { total: 0, owned: 0 },
-      elias: { total: 0, owned: 0 }
+    const areaStats: Record<string, { total: number; owned: number }> = {
+      bakery: { total: 0, owned: 0 },
+      playground: { total: 0, owned: 0 },
+      salon: { total: 0, owned: 0 }
     };
 
     allPets.forEach(pet => {
-      const npcId = pet.npcAffinity;
-      if (npcStats[npcId]) {
-        npcStats[npcId].total++;
+      const area = pet.sectionAffinity?.toLowerCase();
+      if (area && areaStats[area]) {
+        areaStats[area].total++;
         if (this.gachaSystem.playerOwnsPet(pet.petId)) {
-          npcStats[npcId].owned++;
+          areaStats[area].owned++;
         }
       }
     });
 
-    const totalOwned = Object.values(npcStats).reduce((sum, stats) => sum + stats.owned, 0);
-    const totalPets = Object.values(npcStats).reduce((sum, stats) => sum + stats.total, 0);
+    const totalOwned = Object.values(areaStats).reduce((sum, stats) => sum + stats.owned, 0);
+    const totalPets = Object.values(areaStats).reduce((sum, stats) => sum + stats.total, 0);
+
+    const areaConfig = [
+      { id: 'bakery', label: 'Bakery', image: AssetPaths.scenePlaceholder('bakery') },
+      { id: 'playground', label: 'Playground', image: AssetPaths.scenePlaceholder('playground') },
+      { id: 'salon', label: 'Salon', image: AssetPaths.scenePlaceholder('salon') }
+    ];
 
     filtersContainer.innerHTML = `
-      <button class="filter-btn npc-filter active" data-filter="all">
+      <button class="filter-btn area-filter active" data-filter="all">
         <div class="filter-content">
           <span class="filter-label">All</span>
           <span class="filter-progress">${totalOwned}/${totalPets}</span>
         </div>
       </button>
-      ${['aria', 'kai', 'elias'].map(npcId => {
-        const npc = getNPCById(npcId);
-        const stats = npcStats[npcId];
+      ${areaConfig.map(area => {
+        const stats = areaStats[area.id];
         return `
-          <button class="filter-btn npc-filter" data-filter="${npcId}">
+          <button class="filter-btn area-filter" data-filter="${area.id}">
+            <div class="filter-image">
+              <img src="${area.image}" alt="${area.label}" />
+            </div>
             <div class="filter-content">
-              <img src="${npc?.artRefs?.portrait ? (npc.artRefs.portrait.startsWith('/') ? npc.artRefs.portrait.substring(1) : npc.artRefs.portrait) : 'art/ui/placeholder_icon.svg'}" alt="${npc?.name}" class="filter-portrait" />
-              <span class="filter-label">${npc?.name || npcId}</span>
+              <span class="filter-label">${area.label}</span>
               <span class="filter-progress">${stats.owned}/${stats.total}</span>
             </div>
           </button>
@@ -153,9 +160,9 @@ export class PetCollectionScreen extends UnifiedBaseScreen {
 
     // Get all pets
     const allPets = this.getAllPets();
-    const filteredPets = this.filterNpc === 'all' 
+    const filteredPets = this.filterArea === 'all' 
       ? allPets 
-      : allPets.filter(p => p.npcAffinity === this.filterNpc);
+      : allPets.filter(p => p.sectionAffinity?.toLowerCase() === this.filterArea);
 
     // Sort pets: 1) Collected first, 2) By rarity (descending)
     const sortedPets = filteredPets.sort((a, b) => {
@@ -176,17 +183,20 @@ export class PetCollectionScreen extends UnifiedBaseScreen {
     grid.innerHTML = sortedPets.map(pet => {
       const owned = this.gachaSystem.playerOwnsPet(pet.petId);
       const dupeCount = this.gachaSystem.getDuplicateCount(pet.petId);
-      const npc = getNPCById(pet.npcAffinity);
+      const area = pet.sectionAffinity || 'Unknown';
+      
+      // Use transparent portrait if available
+      const transparentPortrait = pet.artRefs?.portrait?.replace('.png', '_transparent.png');
       
       return `
         <div class="pet-card ${owned ? 'pet-owned' : 'pet-unowned'}" data-pet-id="${pet.petId}">
           <div class="pet-affinity-tag">
-            <span class="material-icons icon-sm">favorite</span>
-            <span>${npc?.name || 'Helper'} +${this.getAffinityPoints(pet.rarity)}</span>
+            <span class="material-icons icon-sm">place</span>
+            <span>${area}</span>
           </div>
           <div class="pet-portrait">
             ${owned ? 
-              `<img src="${pet.artRefs?.portrait ? getAssetPath(pet.artRefs.portrait) : AssetPaths.petPlaceholder()}" alt="${pet.name}" />` :
+              `<img src="${transparentPortrait ? getAssetPath(transparentPortrait) : (pet.artRefs?.portrait ? getAssetPath(pet.artRefs.portrait) : AssetPaths.petPlaceholder())}" alt="${pet.name}" />` :
               `<div class="pet-silhouette">?</div>`
             }
           </div>

@@ -63,52 +63,64 @@
 
 /* Filters */
 .collection-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
   padding: 1rem;
   background: white;
   border-bottom: 1px solid #E0E0E0;
 }
 
 .filter-btn {
-  flex: 0 0 auto;
   padding: 0;
   background: white;
   border: 2px solid #E0E0E0;
-  border-radius: 16px;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
   overflow: hidden;
-}
-
-.filter-btn.npc-filter .filter-content {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
+  flex-direction: column;
 }
 
-.filter-btn.npc-filter .filter-portrait {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+.filter-btn.area-filter {
+  min-height: 80px;
+}
+
+.filter-btn .filter-image {
+  width: 100%;
+  height: 50px;
+  overflow: hidden;
+}
+
+.filter-btn .filter-image img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.filter-btn .filter-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.25rem;
 }
 
 .filter-btn .filter-label {
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.7rem;
   color: var(--text-primary);
+  text-align: center;
+  line-height: 1.2;
 }
 
 .filter-btn .filter-progress {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   color: var(--text-secondary);
   background: #F5F5F5;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
+  padding: 0.2rem 0.4rem;
+  border-radius: 8px;
 }
 
 .filter-btn:hover {
@@ -118,13 +130,29 @@
 }
 
 .filter-btn.active {
-  background: var(--color-primary, #FF9E80);
+  background: var(--color-peach-light, #FFEFE8);
   border-color: var(--color-primary, #FF9E80);
-  box-shadow: 0 4px 12px rgba(255, 158, 128, 0.3);
+  box-shadow: 0 2px 8px rgba(255, 158, 128, 0.3);
 }
 
 .filter-btn.active .filter-label {
+  color: var(--color-brown, #5C4033);
+  font-weight: 700;
+}
+
+.filter-btn.active .filter-progress {
+  background: var(--color-primary, #FF9E80);
   color: white;
+  font-weight: 600;
+}
+
+/* Old NPC filter styles - kept for backward compatibility */
+.filter-btn.npc-filter .filter-portrait {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .filter-btn.active .filter-progress {
@@ -182,21 +210,21 @@
 }
 
 .pet-portrait {
-  width: 80px;
-  height: 80px;
+  width: 120px;
+  height: 120px;
   margin: 0 auto 0.5rem;
-  background: #F5F5F5;
+  background: transparent;
   border-radius: 50%;
-  overflow: hidden;
+  overflow: visible;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .pet-portrait img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 140%;
+  height: 140%;
+  object-fit: contain;
 }
 
 .pet-silhouette {
