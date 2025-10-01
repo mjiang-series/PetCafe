@@ -131,6 +131,30 @@
   box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
 }
 
+/* Unlock Dialog Styles */
+.unlock-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  background: linear-gradient(135deg, #FFF5E6 0%, #FFE0CC 100%);
+  border-radius: 12px;
+  margin-bottom: var(--spacing-md);
+}
+
+.unlock-icon {
+  font-size: 4rem;
+  color: #FFD700;
+}
+
+.unlock-hint {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: var(--spacing-sm);
+  text-align: center;
+  font-style: italic;
+}
+
 /* Header */
 .gacha-screen__header {
   display: flex;

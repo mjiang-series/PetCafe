@@ -103,7 +103,7 @@ export class MapSectionScreen extends UnifiedBaseScreen {
         <div class="map-section-info">
           <h2 class="section-subtitle">
             <span class="material-icons">info</span>
-            Tap a <span class="highlight-text">+</span> to assign a pet to a quest
+            Tap a + to assign a pet to a task for the cafe.
           </h2>
           <p class="section-helper-text">
             Managed by <strong>${this.getHelperName()}</strong>
@@ -119,14 +119,20 @@ export class MapSectionScreen extends UnifiedBaseScreen {
   }
 
   private renderQuestMarkers(): string {
-    return this.quests.map(quest => {
+    const player = this.gameState.getPlayer();
+    const unlockedSlots = player.unlockedQuestSlots?.[this.sectionType] || 2;
+    
+    return this.quests.map((quest, index) => {
+      const isLocked = index >= unlockedSlots;
+      
       return `
-        <div class="quest-marker" 
+        <div class="quest-marker ${isLocked ? 'quest-marker--locked' : ''}" 
              id="quest-marker-${quest.questId}"
              data-quest-id="${quest.questId}"
+             data-slot-index="${index}"
              style="left: ${quest.position.x}%; top: ${quest.position.y}%;">
           <button class="quest-add-btn">
-            <span class="material-icons">add</span>
+            <span class="material-icons">${isLocked ? 'lock' : 'add'}</span>
           </button>
         </div>
       `;
@@ -134,6 +140,9 @@ export class MapSectionScreen extends UnifiedBaseScreen {
   }
 
   private renderStats(): string {
+    const player = this.gameState.getPlayer();
+    const unlockedSlots = player.unlockedQuestSlots?.[this.sectionType] || 2;
+    
     const activeCount = Array.from(this.questStates.values())
       .filter(s => s.activeQuest?.status === 'active').length;
     const completeCount = Array.from(this.questStates.values())
@@ -145,7 +154,7 @@ export class MapSectionScreen extends UnifiedBaseScreen {
           <span class="material-icons">schedule</span>
           <div class="stat-content">
             <span class="stat-label">Active Quests</span>
-            <span class="stat-value">${activeCount}/${this.quests.length}</span>
+            <span class="stat-value">${activeCount}/${unlockedSlots}</span>
           </div>
         </div>
         <div class="stat-item">
@@ -168,9 +177,14 @@ export class MapSectionScreen extends UnifiedBaseScreen {
   private setupQuestMarkerListeners(): void {
     // Quest marker clicks
     const markers = this.element?.querySelectorAll('.quest-marker');
+    const player = this.gameState.getPlayer();
+    const unlockedSlots = player.unlockedQuestSlots?.[this.sectionType] || 2;
     
-    markers?.forEach(marker => {
+    markers?.forEach((marker, index) => {
       const questId = marker.getAttribute('data-quest-id');
+      const slotIndex = parseInt(marker.getAttribute('data-slot-index') || '0');
+      const isLocked = slotIndex >= unlockedSlots;
+      
       if (!questId) return;
 
       const questState = this.questStates.get(questId);
@@ -181,6 +195,12 @@ export class MapSectionScreen extends UnifiedBaseScreen {
       addBtn?.addEventListener('click', (e) => {
         e.stopPropagation();
         
+        // Handle locked slots - show level up message
+        if (isLocked) {
+          this.showLockedQuestDialog();
+          return;
+        }
+        
         if (questState.activeQuest?.status === 'complete') {
           this.collectQuestRewards(questId);
         } else if (!questState.activeQuest) {
@@ -188,6 +208,51 @@ export class MapSectionScreen extends UnifiedBaseScreen {
         }
       });
     });
+  }
+
+  private showLockedQuestDialog(): void {
+    const modal = document.createElement('div');
+    modal.className = 'confirmation-modal show';
+    modal.innerHTML = `
+      <div class="modal__backdrop"></div>
+      <div class="modal__content confirmation-modal__content">
+        <h3 class="confirmation-title">Quest Slot Locked</h3>
+        <div class="confirmation-body">
+          <div class="unlock-visual">
+            <span class="material-icons unlock-icon">lock</span>
+          </div>
+          <p class="confirmation-message">
+            Level up your cafe by completing tasks to unlock more quest slots!
+          </p>
+          <p class="unlock-hint">
+            Complete more tasks with your pets to bring in more cafe visitors and level up.
+          </p>
+        </div>
+        <div class="confirmation-actions">
+          <button class="btn btn--primary" id="locked-ok">Got it!</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Handle OK
+    const okHandler = () => modal.remove();
+    modal.querySelector('#locked-ok')?.addEventListener('click', okHandler);
+    modal.querySelector('.modal__backdrop')?.addEventListener('click', okHandler);
+  }
+
+  private refreshQuestMarkers(): void {
+    const questMarkersContainer = this.element?.querySelector('.quest-markers');
+    if (questMarkersContainer) {
+      questMarkersContainer.innerHTML = this.renderQuestMarkers();
+      this.setupQuestMarkerListeners();
+      
+      // Update all quest marker states
+      this.questStates.forEach((_, questId) => {
+        this.updateQuestMarker(questId);
+      });
+    }
   }
 
   private showQuestModal(quest: Quest): void {
@@ -244,10 +309,21 @@ export class MapSectionScreen extends UnifiedBaseScreen {
     const marker = this.element?.querySelector(`#quest-marker-${questId}`);
     if (!marker) return;
 
+    // Check if this slot is locked
+    const slotIndex = parseInt(marker.getAttribute('data-slot-index') || '0');
+    const player = this.gameState.getPlayer();
+    const unlockedSlots = player.unlockedQuestSlots?.[this.sectionType] || 2;
+    const isLocked = slotIndex >= unlockedSlots;
+
+    // Don't update locked markers (they stay locked)
+    if (isLocked) {
+      return;
+    }
+
     const activeQuest = questState.activeQuest;
 
     if (!activeQuest) {
-      // Show + button
+      // Show + button (only for unlocked slots)
       marker.innerHTML = `
         <button class="quest-add-btn">
           <span class="material-icons">add</span>

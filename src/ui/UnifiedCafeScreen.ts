@@ -4,6 +4,7 @@ import { EventSystem } from '../systems/EventSystem';
 import { GameStateManager } from '../systems/GameState';
 import { AssetPaths, getAssetPath } from '../utils/assetPaths';
 import { ScreenHeaderConfig } from './components/ScreenHeader';
+import { getQuestsBySectionType } from '../data/quests';
 
 export class UnifiedCafeScreen extends UnifiedBaseScreen {
   protected getScreenHeaderConfig(): ScreenHeaderConfig | null {
@@ -149,22 +150,22 @@ export class UnifiedCafeScreen extends UnifiedBaseScreen {
       if (!statusBadge) return;
       
       // All sections now use quest-based status
-      const questIdsBySection: Record<string, string[]> = {
-        'bakery': ['bakery_taste_test', 'bakery_temperature_check', 'bakery_cookie_art'],
-        'playground': ['playground_welcome', 'playground_game_invention', 'playground_determination'],
-        'salon': ['salon_fashion_assist', 'salon_royal_judge', 'salon_beauty_teaching']
-      };
+      const sectionType = section.sectionType as 'bakery' | 'playground' | 'salon';
+      const unlockedSlots = player.unlockedQuestSlots?.[sectionType] || 2;
       
-      const questIds = questIdsBySection[section.sectionType];
-      if (questIds) {
+      // Get quest IDs from quest data
+      const allQuests = getQuestsBySectionType(sectionType);
+      const unlockedQuestIds = allQuests.slice(0, unlockedSlots).map(q => q.questId);
+      
+      if (unlockedQuestIds.length > 0) {
         if (!player.activeQuests) {
           // No quests started yet
           statusBadge.className = 'status-badge status--ready';
-          statusBadge.textContent = `${questIds.length} Cafe Tasks Available`;
+          statusBadge.textContent = `${unlockedSlots} Cafe Task${unlockedSlots !== 1 ? 's' : ''} Available`;
           return;
         }
         
-        const activeQuests = questIds.filter(id => player.activeQuests![id]);
+        const activeQuests = unlockedQuestIds.filter(id => player.activeQuests![id]);
         const activeCount = activeQuests.filter(id => player.activeQuests![id]?.status === 'active').length;
         const completeCount = activeQuests.filter(id => player.activeQuests![id]?.status === 'complete').length;
         
@@ -176,7 +177,7 @@ export class UnifiedCafeScreen extends UnifiedBaseScreen {
           statusBadge.textContent = `${activeCount} Cafe Task${activeCount !== 1 ? 's' : ''} in Progress`;
         } else {
           statusBadge.className = 'status-badge status--ready';
-          statusBadge.textContent = `${questIds.length} Cafe Tasks Available`;
+          statusBadge.textContent = `${unlockedSlots} Cafe Task${unlockedSlots !== 1 ? 's' : ''} Available`;
         }
         return;
       }

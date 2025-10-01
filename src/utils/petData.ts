@@ -7,21 +7,26 @@ const petCache = new Map<string, Pet>();
 
 // Special traits mapping
 const SPECIAL_TRAITS: Record<string, string> = {
+  // Bakery traits
   'muffin': 'Expert Taste Tester',
   'peanut': 'Temperature Detective',
-  'buddy': 'Welcome Committee',
-  'prince': 'Royal Judge',
-  'patches': 'Glitter Enthusiast',
-  'chip': 'Organization Expert',
   'luna': 'Cookie Artist',
-  'turbo': 'Determination Master',
-  'sunny': 'Melody Composer',
-  'whiskers': 'Fashion Assistant',
-  'storm': 'Dust Bath Artist',
-  'rue': 'Mood Reader',
-  'harmony': 'Memory Keeper',
-  'blaze': 'Game Inventor',
-  'iris': 'Beauty Teacher'
+  'chip': 'Dough Whisperer',
+  'harmony': 'Pastry Perfectionist',
+  
+  // Playground traits
+  'buddy': 'Welcome Committee',
+  'patches': 'Safety Scout',
+  'turbo': 'Game Master',
+  'blaze': 'Adventure Guide',
+  'sunny': 'Championship Coordinator',
+  
+  // Salon traits
+  'prince': 'Brushing Pro',
+  'whiskers': 'Precision Clipper',
+  'iris': 'Spa Specialist',
+  'storm': 'Style Icon',
+  'rue': 'Makeover Maestro'
 };
 
 // Initialize cache with transformed paths

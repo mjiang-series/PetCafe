@@ -478,25 +478,22 @@ export class ShiftRewardsModal {
   }
 
   private calculatePlayerLevel(visitors: number): number {
-    if (visitors < 1000) return 1;
-    if (visitors < 2500) return 2;
-    if (visitors < 5000) return 3;
-    if (visitors < 10000) return 4;
-    if (visitors < 20000) return 5;
-    if (visitors < 40000) return 6;
-    if (visitors < 80000) return 7;
-    // Continue doubling pattern
-    const level = Math.floor(Math.log2(visitors / 5000)) + 4;
-    return Math.max(1, level);
+    if (visitors < 150) return 1;
+    if (visitors < 250) return 2;
+    if (visitors < 500) return 3;
+    if (visitors < 1000) return 4;
+    // After level 5, require 1000 more subscribers per level
+    return 4 + Math.floor((visitors - 1000) / 1000) + 1;
   }
 
   private getLevelThreshold(level: number): number {
     if (level <= 0) return 0;
-    if (level === 1) return 1000;
-    if (level === 2) return 2500;
-    if (level === 3) return 5000;
-    if (level === 4) return 10000;
-    // Doubling pattern after level 4
-    return 10000 * Math.pow(2, level - 4);
+    if (level === 1) return 0; // Start at level 1
+    if (level === 2) return 150;
+    if (level === 3) return 250;
+    if (level === 4) return 500;
+    if (level === 5) return 1000;
+    // After level 5, each level requires 1000 more subscribers
+    return 1000 + (level - 5) * 1000;
   }
 }

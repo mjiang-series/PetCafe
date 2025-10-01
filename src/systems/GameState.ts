@@ -489,8 +489,14 @@ export class GameStateManager {
       recentPetAcquisitions: [],
       memories: [],
       blogPosts: [],
-      subscribers: 0,
+      subscribers: 120, // Start at 120 subscribers (level 1)
       pendingActions: [],
+      unlockedQuestSlots: {
+        'bakery': 2,
+        'playground': 2,
+        'salon': 2
+      },
+      tutorialFlags: {},
       settings: {
         audio: {
           masterVolume: 1.0,

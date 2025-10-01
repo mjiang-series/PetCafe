@@ -79,6 +79,18 @@
   transform: scale(0.95);
 }
 
+/* Locked Quest Marker */
+.quest-marker--locked .quest-add-btn {
+  background: linear-gradient(135deg, #9E9E9E 0%, #757575 100%);
+  animation: none;
+  cursor: pointer;
+}
+
+.quest-marker--locked .quest-add-btn:hover {
+  background: linear-gradient(135deg, #BDBDBD 0%, #9E9E9E 100%);
+  transform: scale(1.05);
+}
+
 @keyframes pulse {
   0%, 100% {
     transform: scale(1);

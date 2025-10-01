@@ -144,7 +144,10 @@ export class QuestModal {
         <div class="quest-no-pets">
           <span class="material-icons">pets</span>
           <p>No pets with the required trait</p>
-          <p class="quest-no-pets__subtitle">Try collecting more pets from the gacha!</p>
+          <button class="btn btn--primary" id="quest-go-to-adopt">
+            <span class="material-icons">home</span>
+            Adopt
+          </button>
         </div>
       `;
     }
@@ -235,6 +238,13 @@ export class QuestModal {
     // Backdrop click
     const backdrop = this.container.querySelector('.modal__backdrop');
     backdrop?.addEventListener('click', () => this.hide());
+
+    // Go to Adopt button (when no pets available)
+    const goToAdoptBtn = this.container.querySelector('#quest-go-to-adopt');
+    goToAdoptBtn?.addEventListener('click', () => {
+      this.hide();
+      this.eventSystem.emit('ui:show_screen', { screenId: 'gacha' });
+    });
 
     // Pet selection
     const petCards = this.container.querySelectorAll('.quest-pet-card');
