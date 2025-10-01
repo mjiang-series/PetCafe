@@ -84,6 +84,8 @@ export interface PlayerStatistics {
     resultCount: number;
     rarities: string[];
   }[];
+  // Quest-specific stats
+  totalQuestsCompleted?: number;
 }
 
 export interface PetAffinityStats {

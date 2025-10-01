@@ -148,10 +148,15 @@ export class UnifiedCafeScreen extends UnifiedBaseScreen {
       const statusBadge = sectionCard.querySelector('.status-badge');
       if (!statusBadge) return;
       
-      // For Bakery (with quest system), show quest-based status
-      if (section.sectionType === 'bakery') {
-        const questIds = ['bakery_taste_test', 'bakery_temperature_check', 'bakery_cookie_art'];
-        
+      // All sections now use quest-based status
+      const questIdsBySection: Record<string, string[]> = {
+        'bakery': ['bakery_taste_test', 'bakery_temperature_check', 'bakery_cookie_art'],
+        'playground': ['playground_welcome', 'playground_game_invention', 'playground_determination'],
+        'salon': ['salon_fashion_assist', 'salon_royal_judge', 'salon_beauty_teaching']
+      };
+      
+      const questIds = questIdsBySection[section.sectionType];
+      if (questIds) {
         if (!player.activeQuests) {
           // No quests started yet
           statusBadge.className = 'status-badge status--ready';

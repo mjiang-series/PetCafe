@@ -181,6 +181,7 @@ export class QuestModal {
 
     const multiplier = quest.rarityMultipliers[selectedPet.rarity];
     const coins = Math.floor(quest.baseRewards.coins * multiplier);
+    const visitors = Math.floor(coins / 2); // Cafe visitors at half the rate of coins
     const bondXP = Math.floor(quest.baseRewards.npcBondXP * multiplier);
     const tickets = quest.baseRewards.freeGachaCurrency ? 
       Math.floor(quest.baseRewards.freeGachaCurrency * multiplier) : 0;
@@ -206,8 +207,8 @@ export class QuestModal {
             <span class="reward-value">+${coins} coins</span>
           </div>
           <div class="reward-item">
-            <span class="material-icons reward-icon">favorite</span>
-            <span class="reward-value">+${bondXP} bond XP</span>
+            <span class="material-icons reward-icon">groups</span>
+            <span class="reward-value">+${visitors} cafe visitors</span>
           </div>
           ${tickets > 0 ? `
             <div class="reward-item">

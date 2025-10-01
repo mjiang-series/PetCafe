@@ -62,7 +62,7 @@ export const AssetPaths = {
   npcPlaceholder: (npcId: string) => getAssetPath(`art/npc/${npcId}/placeholder_portrait.svg`),
   
   // UI assets
-  logo: () => getAssetPath('art/love_pets_logo_transparent.png'),
+  logo: () => getAssetPath('art/game_logo_transparent.png'),
   gachaBanner: () => getAssetPath('art/ui/gacha_banner.svg'),
   uiIcon: (iconName: string) => getAssetPath(`art/ui/${iconName}.svg`),
   

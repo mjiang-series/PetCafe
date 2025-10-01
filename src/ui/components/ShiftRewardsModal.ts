@@ -3,7 +3,9 @@ import { EventSystem } from '../../systems/EventSystem';
 import { GameStateManager } from '../../systems/GameState';
 import { ShiftRewards } from '../../models/Shift';
 import { getNPCById } from '../../utils/npcData';
+import { getPetById } from '../../utils/petData';
 import { getAssetPath } from '../../utils/AssetPaths';
+import { Memory } from '../../models/Memory';
 
 export interface ShiftRewardsData {
   shift: any;
@@ -11,6 +13,9 @@ export interface ShiftRewardsData {
   npcId: string;
   bondPointsEarned?: number;
   newBondLevel?: number;
+  questTitle?: string;
+  questDescription?: string;
+  assignedPetId?: string;
 }
 
 export class ShiftRewardsModal {
@@ -41,8 +46,12 @@ export class ShiftRewardsModal {
   }
 
   private createElement(data: ShiftRewardsData): void {
-    const npc = getNPCById(data.npcId);
-    const npcName = npc?.name || 'Helper';
+    // Generate and save memory if quest data is provided
+    let generatedMemory: Memory | null = null;
+    if (data.assignedPetId && data.questTitle) {
+      generatedMemory = this.generateQuestMemory(data);
+      this.saveMemoryToJournal(generatedMemory);
+    }
     
     const container = document.createElement('div');
     container.className = 'shift-rewards-modal';
@@ -51,19 +60,14 @@ export class ShiftRewardsModal {
       <div class="modal-backdrop"></div>
       <div class="modal-content">
         <div class="rewards-header">
-          <h2>Shift Complete!</h2>
-          <div class="npc-reaction">
-            <img src="${this.getNPCPortraitPath(npc)}" alt="${npcName}" class="npc-portrait">
-            <div class="speech-bubble">
-              ${this.getNPCReaction(data.npcId, data.rewards)}
-            </div>
-          </div>
+          <h2>${data.questTitle ? 'Task Complete!' : 'Shift Complete!'}</h2>
         </div>
         
         <div class="rewards-body">
-          ${this.createBondSection(data)}
+          ${generatedMemory ? this.createMemorySection(generatedMemory) : ''}
+          ${this.createCafeProgressSection(data)}
           ${this.createRewardsSection(data.rewards)}
-          ${this.createMemorySection(data.rewards)}
+          ${this.createBondSection(data, generatedMemory)}
         </div>
         
         <div class="rewards-footer">
@@ -100,6 +104,19 @@ export class ShiftRewardsModal {
         </span>
       </div>
     `;
+    
+    // Gacha tickets (if present)
+    if (rewards.freeGachaCurrency && rewards.freeGachaCurrency > 0) {
+      html += `
+        <div class="reward-item">
+          <span class="reward-icon material-icons icon-ticket">confirmation_number</span>
+          <span class="reward-text">
+            <span class="reward-amount">+${rewards.freeGachaCurrency}</span>
+            <span class="reward-label">Gacha Ticket${rewards.freeGachaCurrency !== 1 ? 's' : ''}</span>
+          </span>
+        </div>
+      `;
+    }
     
     if (rewards.helperXP > 0) {
       // Skip helper XP display - deprecated
@@ -148,11 +165,14 @@ export class ShiftRewardsModal {
     return html;
   }
 
-  private createBondSection(data: ShiftRewardsData): string {
+  private createBondSection(data: ShiftRewardsData, memory: Memory | null): string {
     if (!data.bondPointsEarned || data.bondPointsEarned === 0) return '';
     
     const bond = this.gameState.getPlayer().npcBonds.find(b => b.npcId === data.npcId);
     if (!bond) return '';
+    
+    const npc = getNPCById(data.npcId);
+    const npcName = npc?.name || 'Helper';
     
     let html = '<div class="bond-progress-section">';
     html += '<h3>Relationship Progress</h3>';
@@ -189,60 +209,36 @@ export class ShiftRewardsModal {
       `;
     }
     
+    // NPC Reaction (moved below summary)
+    html += `
+      <div class="npc-reaction">
+        <img src="${this.getNPCPortraitPath(npc)}" alt="${npcName}" class="npc-portrait">
+        <div class="speech-bubble">
+          ${this.getQuestNPCReaction(data, memory)}
+        </div>
+      </div>
+    `;
+    
     html += '</div>';
     return html;
   }
 
-  private createMemorySection(rewards: ShiftRewards): string {
-    // Check if we have a generated memory directly in rewards
-    const memory = (rewards as any).generatedMemory;
+  private getQuestNPCReaction(data: ShiftRewardsData, memory: Memory | null): string {
+    const pet = data.assignedPetId ? getPetById(data.assignedPetId) : null;
+    const petName = pet?.name || 'them';
+    const questTitle = data.questTitle || 'the task';
     
-    if (!memory && !rewards.memoryCandidateId) {
-      console.log('[ShiftRewardsModal] No memory in rewards');
-      return '';
-    }
+    const reactions = [
+      `${petName} did such an amazing job with ${questTitle}! I'm so grateful for their help today.`,
+      `Wow, ${petName} really went above and beyond! ${questTitle} has never gone so smoothly.`,
+      `I couldn't have done ${questTitle} without ${petName}. They're truly special!`,
+      `${petName} made today so much easier! Their work on ${questTitle} was outstanding.`,
+      `What a wonderful day! ${petName} brought such positive energy to ${questTitle}.`
+    ];
     
-    if (!memory) {
-      console.log('[ShiftRewardsModal] Memory candidate ID exists but no memory object, showing fallback');
-      // Fallback to simple notification if memory not found yet
-      return `
-        <div class="memory-section">
-          <div class="memory-created">
-            <span class="memory-icon material-icons">photo_camera</span>
-            <span class="memory-text">New Memory Created!</span>
-          </div>
-          <p class="memory-hint">Check your journal to relive this moment!</p>
-        </div>
-      `;
-    }
-    
-    console.log('[ShiftRewardsModal] Memory found:', memory);
-    
-    // Show memory preview card
-    return `
-      <div class="memory-section">
-        <h3>Memory Captured!</h3>
-        <div class="memory-preview-card">
-          <div class="memory-preview-image">
-            <img src="${getAssetPath(memory.imageUrl || 'art/memories_image_placeholder.png')}" alt="Memory" />
-            <span class="memory-mood-badge mood--${memory.mood}">${memory.mood}</span>
-          </div>
-          <div class="memory-preview-content">
-            <p class="memory-snippet">${this.truncateText(memory.content, 80)}</p>
-            <button class="btn-secondary view-memory-btn">
-              <span class="material-icons">menu_book</span>
-              <span>View in Journal</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
+    return reactions[Math.floor(Math.random() * reactions.length)];
   }
-  
-  private truncateText(text: string, maxLength: number): string {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength).trim() + '...';
-  }
+
 
   private getNPCReaction(npcId: string, rewards: ShiftRewards): string {
     // Get the NPC data
@@ -344,5 +340,163 @@ export class ShiftRewardsModal {
     // Fallback to placeholder
     const npcId = npc.npcId || 'aria';
     return `art/npc/${npcId}/placeholder_portrait.svg`;
+  }
+
+  private generateQuestMemory(data: ShiftRewardsData): Memory {
+    const pet = getPetById(data.assignedPetId!);
+    const petName = pet?.name || 'A pet';
+    const questTitle = data.questTitle || 'Quest';
+    
+    // Generate a fun tagline (max 280 characters)
+    const tagline = this.generateMemoryTagline(petName, questTitle, data.questDescription || '');
+    
+    const memory: Memory = {
+      memoryId: `quest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      shiftId: 'quest',
+      title: questTitle,
+      snippet: tagline,
+      extendedStory: tagline, // Can expand this later
+      mood: this.getQuestMood(),
+      imageUrl: getAssetPath('art/memories_image_placeholder.png'),
+      location: data.shift.sectionType,
+      taggedNPCs: [data.npcId],
+      taggedPets: [data.assignedPetId!],
+      generatedAt: Date.now(),
+      isPublished: false,
+      isFavorite: false,
+      viewed: false
+    };
+    
+    return memory;
+  }
+
+  private generateMemoryTagline(petName: string, questTitle: string, questDescription: string): string {
+    const templates = [
+      `${petName} absolutely shined during ${questTitle}! Their dedication and skill made everything run smoothly today.`,
+      `What a success! ${petName} tackled ${questTitle} with such enthusiasm. The cafe felt extra special today.`,
+      `${petName} was amazing at ${questTitle} today! Their unique talents really made a difference for everyone.`,
+      `Today ${petName} showed everyone what they're capable of during ${questTitle}. Simply wonderful!`,
+      `${petName}'s hard work on ${questTitle} really paid off! The whole cafe benefited from their special touch.`
+    ];
+    
+    const tagline = templates[Math.floor(Math.random() * templates.length)];
+    return tagline.length > 280 ? tagline.substring(0, 277) + '...' : tagline;
+  }
+
+  private getQuestMood(): string {
+    const moods = ['joyful', 'accomplished', 'satisfied', 'proud', 'content'];
+    return moods[Math.floor(Math.random() * moods.length)];
+  }
+
+  private saveMemoryToJournal(memory: Memory): void {
+    const player = this.gameState.getPlayer();
+    if (!player.memories) {
+      player.memories = [];
+    }
+    player.memories.unshift(memory); // Add to beginning
+    this.gameState.updatePlayer(player);
+    
+    // Emit event for journal badge update
+    this.eventSystem.emit('memory:created', { memory });
+  }
+
+  private createMemorySection(memory: Memory): string {
+    return `
+      <div class="memory-section">
+        <h3>New Memory</h3>
+        <div class="memory-card">
+          <div class="memory-image">
+            <img src="${memory.imageUrl}" alt="${memory.title}" />
+            <div class="memory-mood-badge">${memory.mood}</div>
+          </div>
+          <div class="memory-content">
+            <p class="memory-tagline">${memory.snippet}</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  private createCafeProgressSection(data: ShiftRewardsData): string {
+    const player = this.gameState.getPlayer();
+    const visitorsEarned = Math.floor((data.rewards.coins || 0) / 2);
+    const oldVisitors = player.subscribers || 0;
+    const newVisitors = oldVisitors + visitorsEarned;
+    
+    // Update subscribers (now "Cafe Visitors")
+    player.subscribers = newVisitors;
+    this.gameState.updatePlayer(player); // Save the update
+    
+    // Calculate player level based on visitors
+    const oldLevel = this.calculatePlayerLevel(oldVisitors);
+    const newLevel = this.calculatePlayerLevel(newVisitors);
+    const leveledUp = newLevel > oldLevel;
+    
+    // Get level progress
+    const currentLevelThreshold = this.getLevelThreshold(newLevel - 1);
+    const nextLevelThreshold = this.getLevelThreshold(newLevel);
+    const progressInLevel = newVisitors - currentLevelThreshold;
+    const totalLevelProgress = nextLevelThreshold - currentLevelThreshold;
+    const percentage = Math.min(100, (progressInLevel / totalLevelProgress) * 100);
+    
+    let html = '<div class="cafe-progress-section">';
+    html += '<h3>Cafe Progress</h3>';
+    
+    // Visitors earned
+    html += `
+      <div class="progress-points-earned">
+        <span class="progress-icon material-icons icon-visitors">groups</span>
+        <span class="progress-text">+${visitorsEarned} Cafe Visitors</span>
+      </div>
+    `;
+    
+    // Progress bar
+    html += `
+      <div class="progress-display">
+        <div class="progress-level-info">
+          <span>Level ${newLevel}</span>
+          <span>${newVisitors}/${nextLevelThreshold}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${percentage}%"></div>
+        </div>
+      </div>
+    `;
+    
+    // Level up notification
+    if (leveledUp) {
+      html += `
+        <div class="level-up-badge">
+          <span class="material-icons">star</span>
+          <span>Level Up! Now Level ${newLevel}</span>
+        </div>
+      `;
+    }
+    
+    html += '</div>';
+    return html;
+  }
+
+  private calculatePlayerLevel(visitors: number): number {
+    if (visitors < 1000) return 1;
+    if (visitors < 2500) return 2;
+    if (visitors < 5000) return 3;
+    if (visitors < 10000) return 4;
+    if (visitors < 20000) return 5;
+    if (visitors < 40000) return 6;
+    if (visitors < 80000) return 7;
+    // Continue doubling pattern
+    const level = Math.floor(Math.log2(visitors / 5000)) + 4;
+    return Math.max(1, level);
+  }
+
+  private getLevelThreshold(level: number): number {
+    if (level <= 0) return 0;
+    if (level === 1) return 1000;
+    if (level === 2) return 2500;
+    if (level === 3) return 5000;
+    if (level === 4) return 10000;
+    // Doubling pattern after level 4
+    return 10000 * Math.pow(2, level - 4);
   }
 }

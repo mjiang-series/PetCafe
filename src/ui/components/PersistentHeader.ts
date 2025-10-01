@@ -38,7 +38,7 @@ export class PersistentHeader {
           <span class="material-icons icon-sm">confirmation_number</span>
           <span class="currency-value" id="header-tickets">0</span>
         </div>
-        <div class="currency-item currency-social">
+        <div class="currency-item currency-social" title="Cafe Visitors">
           <span class="material-icons icon-sm">group</span>
           <span class="currency-value" id="header-subscribers">0</span>
         </div>

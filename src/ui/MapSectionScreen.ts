@@ -9,6 +9,7 @@ import { getPetById } from '../utils/petData';
 import { getNPCById } from '../utils/npcData';
 import { getAssetPath } from '../utils/assetPaths';
 import { ScreenHeaderConfig } from './components/ScreenHeader';
+import { ShiftRewardsModal, ShiftRewardsData } from './components/ShiftRewardsModal';
 
 interface MapQuestState {
   quest: Quest;
@@ -348,10 +349,23 @@ export class MapSectionScreen extends UnifiedBaseScreen {
     const rewards = questState.activeQuest.rewards;
     const player = this.gameState.getPlayer();
 
+    // Track quest completion
+    if (!player.statistics.totalQuestsCompleted) {
+      player.statistics.totalQuestsCompleted = 0;
+    }
+    player.statistics.totalQuestsCompleted++;
+
+    // Check if this is the 5th quest - award bonus ticket
+    const questCount = player.statistics.totalQuestsCompleted;
+    const bonusTicket = (questCount % 5 === 0) ? 1 : 0;
+
     // Award rewards
     player.currencies.coins += rewards.coins;
     if (rewards.freeGachaCurrency) {
       player.currencies.freeGachaCurrency += rewards.freeGachaCurrency;
+    }
+    if (bonusTicket > 0) {
+      player.currencies.freeGachaCurrency += bonusTicket;
     }
 
     // Award NPC bond XP
@@ -365,21 +379,31 @@ export class MapSectionScreen extends UnifiedBaseScreen {
     // Update player
     this.gameState.updatePlayer(player);
 
-    // Show rewards modal (reuse existing shift rewards modal)
-    this.eventSystem.emit('shift:show_rewards', {
+    // Show rewards modal with bonus ticket if applicable
+    const rewardsData: ShiftRewardsData = {
+      shift: { sectionType: this.sectionType },
       rewards: {
         coins: rewards.coins,
         npcBondXP: rewards.npcBondXP,
-        freeGachaCurrency: rewards.freeGachaCurrency
+        freeGachaCurrency: (rewards.freeGachaCurrency || 0) + bonusTicket
       },
-      questTitle: questState.quest.title
+      npcId: this.getSectionNPCId(),
+      bondPointsEarned: rewards.npcBondXP,
+      questTitle: questState.quest.title,
+      questDescription: questState.quest.description,
+      assignedPetId: questState.activeQuest.assignedPetId
+    };
+    
+    const modal = new ShiftRewardsModal(this.eventSystem, this.gameState);
+    modal.show(rewardsData, () => {
+      // Clear quest after modal closes
+      questState.activeQuest = null;
+      this.saveQuestStates(); // Persist quest state
+      this.updateQuestMarker(questId);
+      this.updateStats();
+      // Force header update
+      this.eventSystem.emit('player:currencies_updated', {});
     });
-
-    // Clear quest
-    questState.activeQuest = null;
-    this.saveQuestStates(); // Persist quest state
-    this.updateQuestMarker(questId);
-    this.updateStats();
   }
 
   private getSectionNPCId(): string {

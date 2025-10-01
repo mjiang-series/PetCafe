@@ -324,9 +324,10 @@ export class JournalScreen extends UnifiedBaseScreen {
     });
     
     // Truncate content for snippet
-    const snippet = memory.content.length > 80 
-      ? memory.content.substring(0, 80) + '...' 
-      : memory.content;
+    const contentText = memory.snippet || memory.content || '';
+    const snippet = contentText.length > 80 
+      ? contentText.substring(0, 80) + '...' 
+      : contentText;
     
     return `
       <div class="memory-preview-card ${!memory.viewed ? 'unviewed' : ''}" data-memory-id="${memory.id || memory.memoryId}">

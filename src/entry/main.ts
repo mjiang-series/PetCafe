@@ -125,21 +125,13 @@ class PetCafeGame {
       if (data.screenId === 'section' && data.data?.sectionType) {
         console.log('[PetCafe] Creating section screen for:', data.data.sectionType);
         
-        // Use MapSectionScreen for Bakery (prototype), SectionScreen for others
-        const screen = data.data.sectionType === 'bakery' 
-          ? new MapSectionScreen(
-              `section-${data.data.sectionType}`,
-              this.eventSystem,
-              this.gameState,
-              data.data.sectionType
-            )
-          : new SectionScreen(
-              `section-${data.data.sectionType}`,
-              this.eventSystem,
-              this.gameState,
-              data.data.sectionType,
-              this.shiftManager
-            );
+        // Use MapSectionScreen for all sections (quest-based system)
+        const screen = new MapSectionScreen(
+          `section-${data.data.sectionType}`,
+          this.eventSystem,
+          this.gameState,
+          data.data.sectionType
+        );
         
         this.uiManager.registerScreen(screen);
         this.uiManager.showScreen(screen.id, data.data);
