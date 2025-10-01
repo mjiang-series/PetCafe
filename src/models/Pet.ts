@@ -10,10 +10,12 @@ export interface Pet {
   npcAffinity: string;
   artRefs: {
     portrait: string;
+    transparentPortrait?: string; // For map placement
     showcase: string;
     animations?: string[];
   };
   description?: string;
+  specialTrait?: string; // Quest requirement matching
 }
 
 export interface PlayerPet {

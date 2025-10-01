@@ -23,6 +23,7 @@ export interface Player {
   conversations?: ConversationData; // DM conversation history
   unlockedAchievements?: string[]; // Achievement IDs
   unlockedTitles?: string[]; // Earned titles
+  activeQuests?: Record<string, any>; // questId -> ActiveQuest (for quest system persistence)
 }
 
 export interface PlayerProfile {

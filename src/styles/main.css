@@ -11,6 +11,8 @@
 @import './gacha-summary.css';
 @import './section-profile.css';
 @import './persistent-header.css';
+@import './quest-modal.css';
+@import './map-section.css';
 
 /* Base styles */
 :root {

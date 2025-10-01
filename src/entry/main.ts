@@ -8,6 +8,7 @@ import { ShiftManager } from '../systems/ShiftManager';
 import { GachaSystem } from '../systems/GachaSystem';
 import { OfflineProgressionSystem } from '../systems/OfflineProgressionSystem';
 import { SectionScreen } from '../ui/SectionScreen';
+import { MapSectionScreen } from '../ui/MapSectionScreen';
 import { SaveSlotsScreen } from '../ui/SaveSlotsScreen';
 import { GachaScreen } from '../ui/GachaScreen';
 import { PetCollectionScreen } from '../ui/PetCollectionScreen';
@@ -17,6 +18,7 @@ import { BlogScreen } from '../ui/BlogScreen';
 import { JournalScreen } from '../ui/JournalScreen';
 import { MemoryDetailScreen } from '../ui/MemoryDetailScreen';
 import { QuickShareModal } from '../ui/components/QuickShareModal';
+import { QuestModal } from '../ui/components/QuestModal';
 import { BlogPublisher } from '../systems/BlogPublisher';
 import { BondProgressionSystem } from '../systems/BondProgressionSystem';
 import { MemoryAchievementSystem } from '../systems/MemoryAchievementSystem';
@@ -61,6 +63,7 @@ class PetCafeGame {
     
     // Initialize UI components
     new QuickShareModal(this.gameState, this.eventSystem, this.blogPublisher);
+    new QuestModal(this.eventSystem, this.gameState);
     
     // Initialize achievement system
     this.memoryAchievementSystem = new MemoryAchievementSystem(this.eventSystem, this.gameState);
@@ -121,13 +124,22 @@ class PetCafeGame {
       // Handle section screens specially
       if (data.screenId === 'section' && data.data?.sectionType) {
         console.log('[PetCafe] Creating section screen for:', data.data.sectionType);
-        const screen = new SectionScreen(
-          `section-${data.data.sectionType}`,
-          this.eventSystem,
-          this.gameState,
-          data.data.sectionType,
-          this.shiftManager
-        );
+        
+        // Use MapSectionScreen for Bakery (prototype), SectionScreen for others
+        const screen = data.data.sectionType === 'bakery' 
+          ? new MapSectionScreen(
+              `section-${data.data.sectionType}`,
+              this.eventSystem,
+              this.gameState,
+              data.data.sectionType
+            )
+          : new SectionScreen(
+              `section-${data.data.sectionType}`,
+              this.eventSystem,
+              this.gameState,
+              data.data.sectionType,
+              this.shiftManager
+            );
         
         this.uiManager.registerScreen(screen);
         this.uiManager.showScreen(screen.id, data.data);

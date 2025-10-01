@@ -139,6 +139,7 @@ export class UnifiedCafeScreen extends UnifiedBaseScreen {
   private updateSectionStatuses(): void {
     const sections = this.gameState.getCafeSections();
     const activeShifts = this.gameState.getActiveShifts();
+    const player = this.gameState.getPlayer();
     
     sections.forEach(section => {
       const sectionCard = this.element.querySelector(`.section-card[data-section="${section.sectionType}"]`);
@@ -147,7 +148,35 @@ export class UnifiedCafeScreen extends UnifiedBaseScreen {
       const statusBadge = sectionCard.querySelector('.status-badge');
       if (!statusBadge) return;
       
-      // Check for active shift
+      // For Bakery (with quest system), show quest-based status
+      if (section.sectionType === 'bakery') {
+        const questIds = ['bakery_taste_test', 'bakery_temperature_check', 'bakery_cookie_art'];
+        
+        if (!player.activeQuests) {
+          // No quests started yet
+          statusBadge.className = 'status-badge status--ready';
+          statusBadge.textContent = `${questIds.length} Cafe Tasks Available`;
+          return;
+        }
+        
+        const activeQuests = questIds.filter(id => player.activeQuests![id]);
+        const activeCount = activeQuests.filter(id => player.activeQuests![id]?.status === 'active').length;
+        const completeCount = activeQuests.filter(id => player.activeQuests![id]?.status === 'complete').length;
+        
+        if (completeCount > 0) {
+          statusBadge.className = 'status-badge status--complete';
+          statusBadge.textContent = `${completeCount} Cafe Task${completeCount !== 1 ? 's' : ''} Complete!`;
+        } else if (activeCount > 0) {
+          statusBadge.className = 'status-badge status--busy';
+          statusBadge.textContent = `${activeCount} Cafe Task${activeCount !== 1 ? 's' : ''} in Progress`;
+        } else {
+          statusBadge.className = 'status-badge status--ready';
+          statusBadge.textContent = `${questIds.length} Cafe Tasks Available`;
+        }
+        return;
+      }
+      
+      // For other sections (old shift system)
       const activeShift = activeShifts.find(shift => shift.sectionType === section.sectionType);
       
       if (activeShift) {

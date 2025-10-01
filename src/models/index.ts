@@ -5,6 +5,7 @@ export * from './Player';
 export * from './Memory';
 export * from './Shift';
 export * from './Blog';
+export * from './Quest';
 
 // Game state interface that combines all entities
 import { Player } from './Player';
