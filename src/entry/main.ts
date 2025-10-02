@@ -33,6 +33,7 @@ import npcData from '../data/npcs.json';
 import { ScenePlayer } from '../ui/components/ScenePlayer';
 import { VoiceCallOverlay } from '../ui/components/VoiceCallOverlay';
 import scenesData from '../data/scenes.json';
+import VenusAPI from “venus-sdk-api”;
 
 class PetCafeGame {
   private eventSystem: EventSystem;
@@ -80,6 +81,14 @@ class PetCafeGame {
 
     this.setupSystemIntegration();
     this.setupEventListeners();
+
+    // Basic initialization for
+    await VenusAPI.initializeAsync();
+    
+    // With help text
+    await VenusAPI.initializeAsync({
+      helpText: 'This text will be shown in the help screen.'
+    });
   }
 
   async initialize(): Promise<void> {
