@@ -40,7 +40,8 @@
   },
   "dependencies": {
     "@types/howler": "^2.2.7",
-    "howler": "^2.2.3"
+    "howler": "^2.2.3",
+    "venus-sdk-api": "file:./venus-sdk/venus-sdk-api-1.0.0.tgz",
   },
   "engines": {
     "node": ">=16.0.0"
