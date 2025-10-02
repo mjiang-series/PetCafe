@@ -72,6 +72,12 @@ export class AlertNotificationSystem {
   }
 
   public showTutorialAlert(tutorialId: string, title: string, message: string): void {
+    // Check if tutorial has already been shown
+    const player = this.gameState.getPlayer();
+    if (player.tutorialFlags?.[tutorialId]) {
+      return; // Don't show again
+    }
+
     this.showAlert({
       title,
       message,

@@ -44,15 +44,15 @@ export class JournalScreen extends UnifiedBaseScreen {
         <div class="journal-header">
           <div class="journal-stats">
             <div class="stat-item">
-              <span class="stat-label">Memories This Week</span>
+              <span class="stat-label">Today</span>
+              <span class="stat-value" id="memories-today">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">This Week</span>
               <span class="stat-value" id="memories-this-week">0</span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">Total Days</span>
-              <span class="stat-value" id="total-days">0</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Total Memories</span>
+              <span class="stat-label">Total</span>
               <span class="stat-value" id="total-memories">0</span>
             </div>
           </div>
@@ -466,13 +466,18 @@ export class JournalScreen extends UnifiedBaseScreen {
       totalElement.textContent = this.memories.length.toString();
     }
     
-    // Total days
-    const daysElement = this.element.querySelector('#total-days');
-    if (daysElement) {
-      daysElement.textContent = this.calendarData.size.toString();
+    // Memories today (start of today to now)
+    const todayElement = this.element.querySelector('#memories-today');
+    if (todayElement) {
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+      const memoriesToday = this.memories.filter(m => 
+        new Date(m.timestamp) >= startOfToday
+      ).length;
+      todayElement.textContent = memoriesToday.toString();
     }
     
-    // Memories this week
+    // Memories this week (last 7 days)
     const weekElement = this.element.querySelector('#memories-this-week');
     if (weekElement) {
       const oneWeekAgo = new Date();
@@ -483,11 +488,11 @@ export class JournalScreen extends UnifiedBaseScreen {
       weekElement.textContent = memoriesThisWeek.toString();
     }
     
-    // Update NPC filter counts
-    this.updateNPCFilterCounts();
+    // Update area filter counts
+    this.updateAreaFilterCounts();
   }
 
-  private updateNPCFilterCounts(): void {
+  private updateAreaFilterCounts(): void {
     const areaCounts: Record<string, number> = {
       bakery: 0,
       playground: 0,

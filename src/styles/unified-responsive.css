@@ -393,8 +393,8 @@
   }
   
   .sections-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    flex-direction: column;
     gap: 1.5rem;
   }
   
@@ -448,7 +448,8 @@
   }
   
   .sections-grid {
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    flex-direction: column;
     gap: 2rem;
   }
   

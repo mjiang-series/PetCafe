@@ -39,10 +39,23 @@ export class NotificationsOverlay {
         this.show();
       }
     });
+
+    // Listen for game state changes to sync with current player
+    this.eventSystem.on('game:loaded', () => {
+      this.syncWithPlayerState();
+    });
+  }
+
+  private syncWithPlayerState(): void {
+    // Reload notification history for the current player
+    this.loadNotificationHistory();
   }
 
   private loadNotificationHistory(): void {
-    const saved = localStorage.getItem('notificationHistory');
+    const player = this.gameState.getPlayer();
+    const playerId = player.profile?.playerId || 'player1';
+    const key = `notificationHistory_${playerId}`;
+    const saved = localStorage.getItem(key);
     if (saved) {
       try {
         this.notificationHistory = JSON.parse(saved);
@@ -55,7 +68,10 @@ export class NotificationsOverlay {
 
   private saveNotificationHistory(): void {
     try {
-      localStorage.setItem('notificationHistory', JSON.stringify(this.notificationHistory));
+      const player = this.gameState.getPlayer();
+      const playerId = player.profile?.playerId || 'player1';
+      const key = `notificationHistory_${playerId}`;
+      localStorage.setItem(key, JSON.stringify(this.notificationHistory));
     } catch (error) {
       console.error('[NotificationsOverlay] Failed to save history:', error);
     }

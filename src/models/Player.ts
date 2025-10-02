@@ -25,6 +25,7 @@ export interface Player {
   unlockedTitles?: string[]; // Earned titles
   activeQuests?: Record<string, any>; // questId -> ActiveQuest (for quest system persistence)
   unlockedQuestSlots?: Record<string, number>; // sectionType -> number of unlocked slots (default 2, max 5)
+  availableQuestSlotUnlocks?: number; // How many slot unlocks the player has available to spend
   tutorialFlags?: Record<string, boolean>; // Track which tutorials have been shown
 }
 

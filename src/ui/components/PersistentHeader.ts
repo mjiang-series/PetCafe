@@ -22,21 +22,12 @@ export class PersistentHeader {
     const header = document.createElement('header');
     header.className = 'persistent-header';
     header.innerHTML = `
-      <div class="header-player">
-        <button class="player-portrait-btn" data-action="profile" aria-label="Player Profile">
-          <img src="${getAssetPath('art/player_portrait.png')}" alt="Player" class="player-portrait" />
-          <span class="player-level">12</span>
-        </button>
-      </div>
-      
-      <div class="header-currencies">
-        <div class="currency-item currency-soft">
-          <span class="material-icons icon-sm">paid</span>
-          <span class="currency-value" id="header-coins">0</span>
-        </div>
-        <div class="currency-item currency-gacha">
-          <span class="material-icons icon-sm">confirmation_number</span>
-          <span class="currency-value" id="header-tickets">0</span>
+      <div class="header-left">
+        <div class="header-player">
+          <button class="player-portrait-btn" data-action="profile" aria-label="Player Profile">
+            <img src="${getAssetPath('art/player_portrait.png')}" alt="Player" class="player-portrait" />
+            <span class="player-level">12</span>
+          </button>
         </div>
         <div class="currency-item currency-social" title="Cafe Visitors">
           <span class="material-icons icon-sm">group</span>
@@ -45,6 +36,14 @@ export class PersistentHeader {
       </div>
       
       <div class="header-right">
+        <div class="currency-item currency-soft">
+          <span class="material-icons icon-sm">paid</span>
+          <span class="currency-value" id="header-coins">0</span>
+        </div>
+        <div class="currency-item currency-gacha">
+          <span class="material-icons icon-sm">confirmation_number</span>
+          <span class="currency-value" id="header-tickets">0</span>
+        </div>
         <div class="currency-item currency-premium">
           <span class="material-icons icon-sm">diamond</span>
           <span class="currency-value" id="header-diamonds">0</span>

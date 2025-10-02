@@ -64,6 +64,14 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+/* Header Left Section (Player + Subscribers) */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex: 0 0 auto;
+}
+
 /* Currency Section */
 .header-currencies {
   display: flex;
@@ -159,6 +167,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
+  flex: 0 0 auto;
 }
 
 .btn-icon {
@@ -311,33 +320,35 @@
   display: flex;
 }
 
-/* Cafe: Show coins and subscribers (diamonds always visible) */
+/* Cafe: Show subscribers (left), coins (right), diamonds always visible */
 .persistent-header.header-variant-cafe .currency-gacha {
   display: none;
 }
 
-/* Pets & Gacha: Show only tickets (diamonds always visible) */
-.persistent-header.header-variant-gacha .currency-soft,
-.persistent-header.header-variant-gacha .currency-social,
+/* Gacha: Show subscribers (left), tickets (right), diamonds always visible */
+.persistent-header.header-variant-gacha .currency-soft {
+  display: none;
+}
+
+/* Collection: Show subscribers (left), diamonds only (right) */
 .persistent-header.header-variant-collection .currency-soft,
-.persistent-header.header-variant-collection .currency-social {
+.persistent-header.header-variant-collection .currency-gacha {
   display: none;
 }
 
-/* Messages: Show only diamonds (hide all others) */
+/* Messages: Show subscribers (left), diamonds only (right) */
 .persistent-header.header-variant-messages .currency-soft,
-.persistent-header.header-variant-messages .currency-gacha,
-.persistent-header.header-variant-messages .currency-social {
+.persistent-header.header-variant-messages .currency-gacha {
   display: none;
 }
 
-/* Blog: Show only subscribers (diamonds always visible) */
+/* Blog: Show subscribers (left), diamonds only (right) */
 .persistent-header.header-variant-blog .currency-soft,
 .persistent-header.header-variant-blog .currency-gacha {
   display: none;
 }
 
-/* Journal: Show only subscribers (diamonds always visible) */
+/* Journal: Show subscribers (left), diamonds only (right) */
 .persistent-header.header-variant-journal .currency-soft,
 .persistent-header.header-variant-journal .currency-gacha {
   display: none;

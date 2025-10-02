@@ -474,28 +474,23 @@ export class ShiftRewardsModal {
       </div>
     `;
     
-    // Level up notification with unlock option
+    // Level up notification with unlock grant
     if (leveledUp) {
-      const maxQuestSlots = this.getMaxQuestSlotsForLevel(newLevel);
-      const currentUnlockedSlots = player.unlockedQuestSlots || { bakery: 2, playground: 2, salon: 2 };
-      const totalUnlockedSlots = Object.values(currentUnlockedSlots).reduce((sum, val) => sum + (val || 0), 0);
-      const canUnlock = totalUnlockedSlots < maxQuestSlots * 3; // 3 sections
+      // Grant 1 unlock per level gained
+      const levelsGained = newLevel - oldLevel;
+      player.availableQuestSlotUnlocks = (player.availableQuestSlotUnlocks || 0) + levelsGained;
+      this.gameState.updatePlayer(player); // Save the unlock grant
       
       html += `
         <div class="level-up-badge">
           <span class="material-icons">star</span>
           <span>Level Up! Now Level ${newLevel}</span>
         </div>
+        <div class="unlock-hint">
+          <span class="material-icons">lock_open</span>
+          <span>+${levelsGained} Cafe Task Slot Unlock${levelsGained > 1 ? 's' : ''} Available!</span>
+        </div>
       `;
-      
-      if (canUnlock) {
-        html += `
-          <div class="unlock-hint">
-            <span class="material-icons">lock_open</span>
-            <span>New cafe task slots available to unlock!</span>
-          </div>
-        `;
-      }
     }
     
     html += '</div>';

@@ -496,6 +496,7 @@ export class GameStateManager {
         'playground': 2,
         'salon': 2
       },
+      availableQuestSlotUnlocks: 0, // Player starts with no unlocks available
       tutorialFlags: {},
       settings: {
         audio: {

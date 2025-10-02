@@ -368,9 +368,11 @@
   
   .bottom-navigation {
     max-width: 600px;
-    left: 50%;
+    left: 50% !important;
+    right: auto;
     transform: translateX(-50%);
     border-radius: 16px 16px 0 0;
+    margin: 0 auto;
   }
 }
 

@@ -15,12 +15,14 @@
 .journal-stats {
   display: flex;
   justify-content: space-around;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
 }
 
 .stat-item {
   text-align: center;
-  flex: 1;
+  flex: 1 1 30%;
+  min-width: 80px;
 }
 
 .stat-label {

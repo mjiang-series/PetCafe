@@ -215,15 +215,16 @@ export class MapSectionScreen extends UnifiedBaseScreen {
     const playerLevel = player.profile?.cafeLevel || 1;
     const maxQuestSlots = this.getMaxQuestSlotsForLevel(playerLevel);
     const currentUnlockedSlots = player.unlockedQuestSlots?.[this.sectionType] || 2;
-    const canUnlock = currentUnlockedSlots < maxQuestSlots;
+    const availableUnlocks = player.availableQuestSlotUnlocks || 0;
+    const canUnlockWithLevel = currentUnlockedSlots < maxQuestSlots && availableUnlocks > 0;
     const unlockCost = 1000;
     const hasEnoughCoins = (player.currencies?.coins || 0) >= unlockCost;
     
     const modal = document.createElement('div');
     modal.className = 'confirmation-modal show';
     
-    if (canUnlock && hasEnoughCoins) {
-      // Can unlock with coins
+    if (canUnlockWithLevel && hasEnoughCoins) {
+      // Can unlock with coins (and has available unlocks from leveling)
       modal.innerHTML = `
         <div class="modal__backdrop"></div>
         <div class="modal__content confirmation-modal__content">
@@ -234,6 +235,9 @@ export class MapSectionScreen extends UnifiedBaseScreen {
             </div>
             <p class="confirmation-message">
               Expand your cafe to handle more tasks at once!
+            </p>
+            <p class="unlock-hint">
+              You have ${availableUnlocks} unlock${availableUnlocks > 1 ? 's' : ''} available.
             </p>
             <div class="unlock-cost">
               <span class="material-icons">attach_money</span>
@@ -246,8 +250,8 @@ export class MapSectionScreen extends UnifiedBaseScreen {
           </div>
         </div>
       `;
-    } else if (canUnlock && !hasEnoughCoins) {
-      // Not enough coins
+    } else if (canUnlockWithLevel && !hasEnoughCoins) {
+      // Has unlocks available but not enough coins
       modal.innerHTML = `
         <div class="modal__backdrop"></div>
         <div class="modal__content confirmation-modal__content">
@@ -269,7 +273,7 @@ export class MapSectionScreen extends UnifiedBaseScreen {
         </div>
       `;
     } else {
-      // Need to level up
+      // Need to level up (no unlocks available)
       modal.innerHTML = `
         <div class="modal__backdrop"></div>
         <div class="modal__content confirmation-modal__content">
@@ -305,6 +309,9 @@ export class MapSectionScreen extends UnifiedBaseScreen {
       // Deduct coins
       player.currencies = player.currencies || { coins: 0, premiumCurrency: 0, freeGachaCurrency: 0 };
       player.currencies.coins -= unlockCost;
+      
+      // Consume 1 available unlock
+      player.availableQuestSlotUnlocks = (player.availableQuestSlotUnlocks || 0) - 1;
       
       // Unlock the slot
       player.unlockedQuestSlots = player.unlockedQuestSlots || { bakery: 2, playground: 2, salon: 2 };

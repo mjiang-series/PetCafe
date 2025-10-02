@@ -85,7 +85,11 @@ export class UIManager {
   showOverlay(overlayId: string, data?: any): void {
     const overlay = this.overlays.get(overlayId);
     if (!overlay) {
-      console.error(`[UIManager] Overlay not found: ${overlayId}`);
+      // Some overlays (like notifications) handle themselves via events
+      // Only log as warning, not error
+      if (overlayId !== 'notifications') {
+        console.error(`[UIManager] Overlay not found: ${overlayId}`);
+      }
       return;
     }
 

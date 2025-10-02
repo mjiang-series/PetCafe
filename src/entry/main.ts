@@ -444,7 +444,7 @@ class PetCafeGame {
     
     // Unlock gacha for first pet pull
     this.gameState.unlock('features', 'gacha');
-    this.eventSystem.emit('tutorial:show_gacha');
+    // Tutorial is now handled by individual screens
   }
 
   private completeTutorialStep(data: { step: string }): void {
@@ -453,11 +453,11 @@ class PetCafeGame {
     switch (data.step) {
       case 'first_gacha':
         this.gameState.unlock('features', 'shifts');
-        this.eventSystem.emit('tutorial:show_shifts');
+        // Tutorial is now handled by individual screens
         break;
       case 'first_shift':
         this.gameState.unlock('features', 'blog');
-        this.eventSystem.emit('tutorial:show_blog');
+        // Tutorial is now handled by individual screens
         break;
       case 'first_blog':
         this.uiManager.showSuccess('Tutorial complete! You\'re ready to run your café.');
