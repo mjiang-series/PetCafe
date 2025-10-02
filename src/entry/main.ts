@@ -33,7 +33,7 @@ import npcData from '../data/npcs.json';
 import { ScenePlayer } from '../ui/components/ScenePlayer';
 import { VoiceCallOverlay } from '../ui/components/VoiceCallOverlay';
 import scenesData from '../data/scenes.json';
-import VenusAPI from “venus-sdk-api”;
+import VenusAPI from 'venus-sdk-api';
 
 class PetCafeGame {
   private eventSystem: EventSystem;
@@ -81,15 +81,15 @@ class PetCafeGame {
 
     this.setupSystemIntegration();
     this.setupEventListeners();
-
-    // Basic initialization for
-    await VenusAPI.initializeAsync();
   }
 
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
 
     try {
+      console.log('[PetCafe] Initializing Venus SDK...');
+      await VenusAPI.initializeAsync();
+      
       console.log('[PetCafe] Loading game data...');
       
       // Try to load existing save data
