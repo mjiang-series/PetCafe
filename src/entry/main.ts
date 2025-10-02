@@ -84,11 +84,6 @@ class PetCafeGame {
 
     // Basic initialization for
     await VenusAPI.initializeAsync();
-    
-    // With help text
-    await VenusAPI.initializeAsync({
-      helpText: 'This text will be shown in the help screen.'
-    });
   }
 
   async initialize(): Promise<void> {
