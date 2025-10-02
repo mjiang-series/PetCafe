@@ -356,22 +356,29 @@ export class ShiftRewardsModal {
     
     // Generate a fun tagline (max 280 characters)
     const tagline = this.generateMemoryTagline(petName, questTitle, data.questDescription || '');
+    const now = Date.now();
+    const memoryId = `quest_${now}_${Math.random().toString(36).substr(2, 9)}`;
     
     const memory: Memory = {
-      memoryId: `quest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: memoryId,
+      memoryId: memoryId,
       shiftId: 'quest',
-      title: questTitle,
-      snippet: tagline,
+      content: tagline,
       extendedStory: tagline, // Can expand this later
       mood: this.getQuestMood(),
       imageUrl: getAssetPath('art/memories_image_placeholder.png'),
       location: data.shift.sectionType,
       taggedNPCs: [data.npcId],
+      taggedNpcs: [data.npcId],
       taggedPets: [data.assignedPetId!],
-      generatedAt: Date.now(),
+      petIds: [data.assignedPetId!],
+      timestamp: now,
+      createdAt: now,
+      likes: 0,
+      views: 0,
       isPublished: false,
-      isFavorite: false,
-      viewed: false
+      viewed: false,
+      favorited: false
     };
     
     return memory;
@@ -413,11 +420,11 @@ export class ShiftRewardsModal {
         <h3>New Memory</h3>
         <div class="memory-card">
           <div class="memory-image">
-            <img src="${memory.imageUrl}" alt="${memory.title}" />
+            <img src="${memory.imageUrl}" alt="Memory" />
             <div class="memory-mood-badge">${memory.mood}</div>
           </div>
           <div class="memory-content">
-            <p class="memory-tagline">${memory.snippet}</p>
+            <p class="memory-tagline">${memory.content}</p>
           </div>
         </div>
       </div>
