@@ -7,6 +7,8 @@ import { ScreenHeaderConfig } from './components/ScreenHeader';
 import { getQuestsBySectionType } from '../data/quests';
 
 export class UnifiedCafeScreen extends UnifiedBaseScreen {
+  private videoBackground: HTMLVideoElement | null = null;
+
   protected getScreenHeaderConfig(): ScreenHeaderConfig | null {
     // No screen header for cafe overview - it's the main screen
     return null;
@@ -14,6 +16,18 @@ export class UnifiedCafeScreen extends UnifiedBaseScreen {
 
   protected createContent(): string {
     return `
+      <!-- Animated Video Background -->
+      <div class="cafe-video-background">
+        <video 
+          class="cafe-background-video" 
+          autoplay 
+          loop 
+          muted 
+          playsinline
+          src="${getAssetPath('art/ui/MyPetCafe_HomeScreenAnimated.mp4')}"
+        ></video>
+      </div>
+
       <!-- Cafe Sections -->
       <section class="sections-grid">
         <h3 class="section-title">Café Areas</h3>
@@ -58,10 +72,31 @@ export class UnifiedCafeScreen extends UnifiedBaseScreen {
   onShow(): void {
     this.updateDisplay();
     this.updateSectionStatuses();
+    this.startVideoBackground();
   }
 
   onHide(): void {
-    // Cleanup if needed
+    this.stopVideoBackground();
+  }
+
+  private startVideoBackground(): void {
+    // Get reference to video element
+    this.videoBackground = this.element.querySelector('.cafe-background-video');
+    
+    if (this.videoBackground) {
+      // Ensure video plays (some browsers may block autoplay)
+      this.videoBackground.play().catch(err => {
+        console.warn('[UnifiedCafeScreen] Video autoplay blocked:', err);
+      });
+    }
+  }
+
+  private stopVideoBackground(): void {
+    if (this.videoBackground) {
+      this.videoBackground.pause();
+      this.videoBackground.currentTime = 0;
+      this.videoBackground = null;
+    }
   }
 
   protected override setupEventListeners(): void {
